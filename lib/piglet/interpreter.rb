@@ -20,7 +20,9 @@ module Piglet
     end
   
     def to_pig_latin
-      @statements.map { |stmt| stmt.to_pig_latin }.join("\n")
+      @str = @statements.map { |stmt| stmt.to_pig_latin }.join(";\n")
+      @str << ';' unless @str.empty?
+      @str
     end
   
   private
