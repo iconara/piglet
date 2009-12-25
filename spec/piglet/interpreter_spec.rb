@@ -52,5 +52,12 @@ describe Piglet::Interpreter do
       @interpreter.to_pig_latin.should eql(%{LOAD 'some/path';\nLOAD 'some/other/path';})
     end
   end
+  
+  context 'relations as variables' do
+    it 'can store a relation in a variable' do
+      @interpreter.interpret { a << load('some/path') }
+      @interpreter.to_pig_latin.should eql(%{a = LOAD 'some/path';})
+    end
+  end
 
 end

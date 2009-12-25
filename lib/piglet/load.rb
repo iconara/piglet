@@ -6,13 +6,6 @@ module Piglet
       @fields = nil
     end
     
-    def to_pig_latin
-      str = "LOAD '#{@path}'"
-      str << " USING #{method_name}" if @method
-      str << " AS (#{field_list})" if @fields
-      str
-    end
-    
     def using(method)
       @method = method
       self
@@ -21,6 +14,13 @@ module Piglet
     def as(*fields)
       @fields = fields
       self
+    end
+    
+    def to_pig_latin
+      str = "LOAD '#{@path}'"
+      str << " USING #{method_name}" if @method
+      str << " AS (#{field_list})" if @fields
+      str
     end
   
   private

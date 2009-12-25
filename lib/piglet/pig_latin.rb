@@ -2,9 +2,7 @@ module Piglet
   module PigLatin
   
     def load(path)
-      load = Load.new(path)
-      @statements << load
-      load
+      push_statement Load.new(path)
     end
 
   end

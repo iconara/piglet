@@ -3,4 +3,5 @@ module Piglet
   autoload :PigLatin, 'piglet/pig_latin'
   autoload :Load, 'piglet/load'
   autoload :NoOp, 'piglet/no_op'
+  autoload :Assignment, 'piglet/assignment'
 end
