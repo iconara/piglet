@@ -27,8 +27,8 @@ module Piglet
   
     def method_name
       case @method
-      when :pig_latin
-        'PigLatin'
+      when :pig_storage
+        'PigStorage'
       else
         @method
       end
