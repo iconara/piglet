@@ -7,6 +7,14 @@ describe Piglet::Interpreter do
     @interpreter = Piglet::Interpreter.new
   end
 
+  it 'interprets a block given to #new' do
+    Piglet::Interpreter.new { load('some/path') }.to_pig_latin.should eql("LOAD 'some/path';")
+  end
+  
+  it 'interprets a block given to #interpret' do
+    @interpreter.interpret { load('some/path') }.to_pig_latin.should eql("LOAD 'some/path';")
+  end
+
   it 'does nothing with no commands' do
     @interpreter.interpret.to_pig_latin.should == ''
   end

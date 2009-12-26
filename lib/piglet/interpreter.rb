@@ -5,9 +5,10 @@ module Piglet
     include PigLatin
   
   
-    def initialize
+    def initialize(&block)
       @statements = [ ]
       @last_relation = nil
+      interpret(&block) if block_given?
     end
   
     def interpret(&block)
