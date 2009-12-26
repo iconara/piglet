@@ -35,9 +35,9 @@ describe Piglet::Interpreter do
       @interpreter.to_pig_latin.should eql(%{LOAD 'some/path' USING Test;})
     end
     
-    it 'knows that the load method :pig_latin means PigLatin' do
-      @interpreter.interpret { load('some/path').using(:pig_latin) }
-      @interpreter.to_pig_latin.should eql(%{LOAD 'some/path' USING PigLatin;})
+    it 'knows that the load method :pig_storage means PigStorage' do
+      @interpreter.interpret { load('some/path').using(:pig_storage) }
+      @interpreter.to_pig_latin.should eql(%{LOAD 'some/path' USING PigStorage;})
     end
     
     it 'constructs a LOAD statement with an AS clause' do
