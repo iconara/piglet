@@ -23,7 +23,7 @@
 # 
 # STORE ads INTO '$OUTPUT/ads' USING PigStorage;
 
-raw_ads = load('$INPUT/ads*').using(:pig_storage).as(
+raw_ads << load('$INPUT/ads*').using(:pig_storage).as(
   [:ad_id, :chararray],
   [:api_key, :chararray],
   [:name, :chararray],
@@ -32,7 +32,7 @@ raw_ads = load('$INPUT/ads*').using(:pig_storage).as(
   [:agent_version, :chararray]
 )
 
-ads = (raw_ads.group(:ad_id)).foreach do |relation|
+ads << (raw_ads.group(:ad_id)).foreach do |relation|
   [
     relation[0].as(:ad_id),
     relation[1].api_key.max.as(:api_key),
