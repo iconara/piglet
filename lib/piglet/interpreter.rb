@@ -176,7 +176,9 @@ module Piglet
     
     # x.union(y)    # => UNION x, y
     # x.union(y, z) # => UNION x, y, z
-    def union; raise NotSupportedError; end
+    def union(*relations)
+      Union.new(*([self] + relations))
+    end
 
     def hash
       self.alias.hash
@@ -289,6 +291,24 @@ module Piglet
   
   private
     
+    def source_aliases
+      @sources.map { |s| s.alias }
+    end
+  end
+  
+  class Union
+    include Relation
+    
+    def initialize(*relations)
+      @sources = relations
+    end
+    
+    def to_s
+      "UNION #{source_aliases.join(', ')}"
+    end
+    
+  private
+  
     def source_aliases
       @sources.map { |s| s.alias }
     end

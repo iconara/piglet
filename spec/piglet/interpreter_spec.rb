@@ -183,6 +183,30 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/CROSS \w+, \w+, \w+ PARALLEL 4/)
       end
     end
+
+    describe 'UNION' do
+      it 'outputs a UNION statement with two relations' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.union(b)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/UNION \w+, \w+/)
+      end
+      
+      it 'outputs a UNION statement with many relations' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = load('in3')
+          d = load('in4')
+          e = a.union(b, c, d)
+          dump(e)
+        end
+        @interpreter.to_pig_latin.should match(/UNION \w+, \w+, \w+, \w+/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do

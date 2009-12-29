@@ -42,4 +42,12 @@ describe Piglet::Relation do
     end
   end
   
+  describe '#union' do
+    it 'returns a new relation with the target relation as one of the sources' do
+      other = Object.new
+      other.extend Piglet::Relation
+      @relation.union(other).sources.should include(@relation)
+    end
+  end
+  
 end
