@@ -84,8 +84,8 @@ module Piglet
     def assignments(relation, ignore_set)
       return [] if ignore_set.include?(relation)
       assignment = Assignment.new(relation)
-      if relation.source
-        assignments(relation.source, ignore_set) + [assignment]
+      if relation.sources
+        (relation.sources.map { |source| assignments(source, ignore_set) } + [assignment]).flatten
       else
         [assignment]
       end
@@ -94,8 +94,8 @@ module Piglet
   end
   
   module Relation
-    attr_reader :source
-        
+    attr_reader :sources
+
     def alias
       @alias ||= Relation.next_alias
     end
@@ -104,21 +104,8 @@ module Piglet
     # x.group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
     # x.group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
     def group(*args)
-      grouping = [ ]
-      options = nil
-      args.each do |a|
-        case a
-        when Hash
-          options = a
-          break
-        when Array
-          grouping += a
-        else
-          grouping << a
-        end
-      end
-      
-      Group.new(self, grouping, options)
+      grouping, options = split_at_options(args)
+      Group.new(self, [grouping].flatten, options)
     end
     
     # x.distinct                 # => DISTINCT x
@@ -137,7 +124,10 @@ module Piglet
     # x.cross(y)                      # => CROSS x, y
     # x.cross(y, z, w)                # => CROSS x, y, z, w
     # x.cross([y, z], :parallel => 5) # => CROSS x, y, z, w PARALLEL 5
-    def cross; raise NotSupportedError; end
+    def cross(*args)
+      relations, options = split_at_options(args)
+      Cross.new(([self] + relations).flatten, options)
+    end
     
     # x.filter(:a.eql(:b))                   # => FILTER x BY a == b
     # x.filter(:a.gt(:b).and(:c.not_eql(3))) # => FILTER x BY a > b AND c != 3
@@ -198,6 +188,14 @@ module Piglet
     
   private
   
+    def split_at_options(parameters)
+      if parameters.last.is_a? Hash
+        [parameters[0..-2], parameters.last]
+      else
+        [parameters, nil]
+      end
+    end
+
     def self.next_alias
       @counter ||= 0
       @counter += 1
@@ -245,11 +243,11 @@ module Piglet
     
     def initialize(relation, grouping, options={})
       options ||= {}
-      @source, @grouping, @parallel = relation, grouping, options[:parallel]
+      @sources, @grouping, @parallel = [relation], grouping, options[:parallel]
     end
     
     def to_s
-      str = "GROUP #{@source.alias} BY "
+      str = "GROUP #{@sources.first.alias} BY "
       if @grouping.size > 1
         str << "(#{@grouping.join(', ')})"
       else
@@ -265,13 +263,34 @@ module Piglet
     
     def initialize(relation, options={})
       options ||= {}
-      @source, @parallel = relation, options[:parallel]
+      @sources, @parallel = [relation], options[:parallel]
     end
     
     def to_s
-      str  = "DISTINCT #{@source.alias}"
+      str  = "DISTINCT #{@sources.first.alias}"
       str << " PARALLEL #{@parallel}" if @parallel
       str
+    end
+  end
+  
+  class Cross
+    include Relation
+    
+    def initialize(relations, options={})
+      options ||= {}
+      @sources, @parallel = relations, options[:parallel]
+    end
+    
+    def to_s
+      str  = "CROSS #{source_aliases.join(', ')}"
+      str << " PARALLEL #{@parallel}" if @parallel
+      str
+    end
+  
+  private
+    
+    def source_aliases
+      @sources.map { |s| s.alias }
     end
   end
   

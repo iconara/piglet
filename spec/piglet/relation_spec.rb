@@ -24,13 +24,21 @@ describe Piglet::Relation do
   
   describe '#group' do
     it 'returns a new relation with the target relation as source' do
-      @relation.group(:a).source.should == @relation
+      @relation.group(:a).sources.should include(@relation)
     end
   end
   
   describe '#distinct' do
     it 'returns a new relation with the target relation as source' do
-      @relation.distinct.source.should == @relation
+      @relation.distinct.sources.should include(@relation)
+    end
+  end
+  
+  describe '#cross' do
+    it 'returns a new relation with the target relation as one of the sources' do
+      other = Object.new
+      other.extend Piglet::Relation
+      @relation.cross(other).sources.should include(@relation)
     end
   end
   
