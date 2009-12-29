@@ -22,12 +22,12 @@ describe Piglet::Interpreter do
   end
     
   describe 'LOAD' do
-    it 'constructs a LOAD statement without a USING clause if none specified' do
+    it 'outputs a LOAD statement without a USING clause if none specified' do
       @interpreter.interpret { store(load('some/path'), 'out') }
       @interpreter.to_pig_latin.should_not include('USING')
     end
   
-    it 'constructs a LOAD statement with a USING clause with a specified method' do
+    it 'outputs a LOAD statement with a USING clause with a specified method' do
       @interpreter.interpret { store(load('some/path', :using => 'XYZ'), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' USING XYZ;")
     end
@@ -37,17 +37,17 @@ describe Piglet::Interpreter do
       @interpreter.to_pig_latin.should include("LOAD 'some/path' USING PigStorage;")
     end
   
-    it 'constructs a LOAD statement with an AS clause' do
+    it 'outputs a LOAD statement with an AS clause' do
       @interpreter.interpret { store(load('some/path', :schema => %w(a b c)), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' AS (a, b, c);")
     end
   
-    it 'constructs a LOAD statement with an AS clause with types' do
+    it 'outputs a LOAD statement with an AS clause with types' do
       @interpreter.interpret { store(load('some/path', :schema => [:a, [:b, :chararray], :c]), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' AS (a, b:chararray, c);")
     end
   
-    it 'constructs a LOAD statement with an AS clause with types specified as both strings and symbols' do
+    it 'outputs a LOAD statement with an AS clause with types specified as both strings and symbols' do
       @interpreter.interpret { store(load('some/path', :schema => [:a, %w(b chararray), :c]), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' AS (a, b:chararray, c);")
     end
