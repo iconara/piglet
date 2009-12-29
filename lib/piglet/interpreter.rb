@@ -1,49 +1,120 @@
-module Piglet
-  
-  class Interpreter
+require 'set'
 
-    include PigLatin
-  
-  
+
+module Piglet
+  class Interpreter
     def initialize(&block)
-      @statements = [ ]
-      @last_relation = nil
+      @stores = [ ]
+      
       interpret(&block) if block_given?
     end
   
     def interpret(&block)
       if block_given?
         instance_eval(&block)
-      else
-        push_statement no_op
       end
     
       self
     end
     
-    def push_statement(stmt)
-      unless @statements.last.is_a?(Assignment)
-        @statements << stmt
+    def to_pig_latin
+      statements = [ ]
+      
+      @stores.each do |store|
+        statements << Assignment.new(store.relation)
+        statements << store
       end
-      stmt
+      
+      #puts statements
+      
+      if statements.empty?
+        ''
+      else
+        statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
+      end
     end
     
-    def method_missing(symbol, *args)
-      push_statement Assignment.new(symbol)
-    end
-  
-    def to_pig_latin
-      @str = @statements.map { |stmt| stmt.to_pig_latin }.join(";\n")
-      @str << ';' unless @str.empty?
-      @str
-    end
-  
   private
-
-    def no_op
-      NoOp.new
+    
+    def load(path, options={})
+      Load.new(path, options)
     end
-  
+    
+    def store(relation, path, options={})
+      @stores << Store.new(relation, path, options)
+    end
   end
-
+  
+  module Relation
+    def self.next_name
+      @counter ||= 0
+      @counter += 1
+      "relation_#{@counter}"
+    end
+    
+    def name
+      @name ||= Relation.next_name
+    end
+  end
+  
+  class Assignment
+    def initialize(relation)
+      @relation = relation
+    end
+    
+    def to_s
+      "#{@relation.name} = #{@relation.to_s}"
+    end
+  end
+  
+  class Load
+    include Relation
+    
+    def initialize(path, options={})
+      @path, @using, @schema = path, options[:using], options[:schema]
+    end
+    
+    def to_s
+      str  = "LOAD '#{@path}'"
+      str << " USING #{function}" if @using
+      str << " AS (#{schema_string})" if @schema
+      str
+    end
+    
+  private
+    
+    def function
+      case @using
+      when :pig_storage
+        'PigStorage'
+      else
+        @using
+      end
+    end
+    
+    def schema_string
+      @schema.map do |field|
+        if field.is_a?(Enumerable)
+          field.map { |f| f.to_s }.join(':')
+        else
+          field.to_s
+        end
+      end.join(', ')
+    end
+    
+  end
+  
+  class Store
+    attr_reader :relation
+    
+    def initialize(relation, path, options={})
+      @relation, @path, @using = relation, path, options[:using]
+    end
+    
+    def to_s
+      str  = "STORE #{relation.name} INTO '#{@path}'"
+      str << " USING #{@using}" if @using
+      str
+    end
+  end
 end

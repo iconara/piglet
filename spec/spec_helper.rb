@@ -7,6 +7,8 @@ require 'spec'
 require 'spec/autorun'
 
 
+require 'piglet/interpreter'
+
 Spec::Runner.configure do |config|
   
 end
