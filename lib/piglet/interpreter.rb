@@ -52,6 +52,18 @@ module Piglet
     def store(relation, path, options={})
       @stores << Store.new(relation, path, options)
     end
+    
+    def dump(relation)
+      @stores << Dump.new(relation)
+    end
+    
+    def illustrate(relation)
+      @stores << Illustrate.new(relation)
+    end
+    
+    def describe(relation)
+      @stores << Describe.new(relation)
+    end
   end
   
   module Relation
@@ -111,6 +123,18 @@ module Piglet
       else
         name
       end
+    end
+  end
+  
+  module Storing
+    attr_reader :relation
+    
+    def initialize(relation)
+      @relation = relation
+    end
+    
+    def to_s
+      "#{self.class.name.split(/::/).last.upcase} #{@relation.alias}"
     end
   end
   
@@ -193,17 +217,29 @@ module Piglet
   
   class Store
     include LoadAndStore
-    
-    attr_reader :relation
+    include Storing
     
     def initialize(relation, path, options={})
       @relation, @path, @using = relation, path, options[:using]
     end
     
     def to_s
-      str  = "STORE #{relation.alias} INTO '#{@path}'"
+      str  = super
+      str << " INTO '#{@path}'"
       str << " USING #{resolve_load_store_function(@using)}" if @using
       str
     end
+  end
+  
+  class Dump
+    include Storing
+  end
+  
+  class Illustrate
+    include Storing
+  end
+  
+  class Describe
+    include Storing
   end
 end

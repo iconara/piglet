@@ -80,6 +80,27 @@ describe Piglet::Interpreter do
     end
   end
 
+  describe 'DUMP' do
+    it 'outputs a DUMP statement' do
+      @interpreter.interpret { dump(load('some/path')) }
+      @interpreter.to_pig_latin.should match(/DUMP \w+/)
+    end
+  end
+  
+  describe 'ILLUSTRATE' do
+    it 'outputs an ILLUSTRATE statement' do
+      @interpreter.interpret { illustrate(load('some/path')) }
+      @interpreter.to_pig_latin.should match(/ILLUSTRATE \w+/)
+    end
+  end
+  
+  describe 'DESCRIBE' do
+    it 'outputs a DESCRIBE statement' do
+      @interpreter.interpret { describe(load('some/path')) }
+      @interpreter.to_pig_latin.should match(/DESCRIBE \w+/)
+    end
+  end
+
   context 'aliasing & multiple statements' do
     it 'aliases the loaded relation and uses the same alias in the STORE statement' do
       @interpreter.interpret { store(load('in'), 'out') }
