@@ -25,9 +25,9 @@ module Piglet
       
       @stores.each do |store|
         unless store.relation.nil?
-          relation_prerequisites(store.relation).each do |preq|
-            statements << preq unless handled_relations.include?(preq.target)
-            handled_relations << preq.target
+          assignments(store.relation).each do |assignment|
+            statements << assignment unless handled_relations.include?(assignment.target)
+            handled_relations << assignment.target
           end
         end
         statements << store
@@ -38,10 +38,10 @@ module Piglet
     
   private
   
-    def relation_prerequisites(relation)
+    def assignments(relation)
       assignment = Assignment.new(relation)
       if relation.source
-        relation_prerequisites(relation.source) + [assignment]
+        assignments(relation.source) + [assignment]
       else
         [assignment]
       end
