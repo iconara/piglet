@@ -22,12 +22,17 @@ describe Piglet::Interpreter do
   end
     
   describe 'LOAD' do
+    it 'outputs a LOAD statement' do
+      @interpreter.interpret { store(load('some/path'), 'out') }
+      @interpreter.to_pig_latin.should include("LOAD 'some/path'")
+    end
+    
     it 'outputs a LOAD statement without a USING clause if none specified' do
       @interpreter.interpret { store(load('some/path'), 'out') }
       @interpreter.to_pig_latin.should_not include('USING')
     end
   
-    it 'outputs a LOAD statement with a USING clause with a specified method' do
+    it 'outputs a LOAD statement with a USING clause with a specified function' do
       @interpreter.interpret { store(load('some/path', :using => 'XYZ'), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' USING XYZ;")
     end
@@ -50,6 +55,28 @@ describe Piglet::Interpreter do
     it 'outputs a LOAD statement with an AS clause with types specified as both strings and symbols' do
       @interpreter.interpret { store(load('some/path', :schema => [:a, %w(b chararray), :c]), 'out') }
       @interpreter.to_pig_latin.should include("LOAD 'some/path' AS (a, b:chararray, c);")
+    end
+  end
+
+  describe 'STORE' do
+    it 'outputs a STORE statement' do
+      @interpreter.interpret { store(load('some/path'), 'out') }
+      @interpreter.to_pig_latin.should match(/STORE \w+ INTO 'out'/)
+    end
+    
+    it 'outputs a STORE statement without a USING clause if none specified' do
+      @interpreter.interpret { store(load('some/path'), 'out') }
+      @interpreter.to_pig_latin.should_not include("USING")
+    end
+    
+    it 'outputs a STORE statement with a USING clause with a specified function' do
+      @interpreter.interpret { store(load('some/path'), 'out', :using => 'XYZ') }
+      @interpreter.to_pig_latin.should match(/STORE \w+ INTO 'out' USING XYZ/)
+    end
+  
+    it 'knows that the load method :pig_storage means PigStorage' do
+      @interpreter.interpret { store(load('some/path'), 'out', :using => :pig_storage) }
+      @interpreter.to_pig_latin.should match(/STORE \w+ INTO 'out' USING PigStorage/)
     end
   end
   

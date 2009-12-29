@@ -57,6 +57,17 @@ module Piglet
     end
   end
   
+  module LoadAndStore
+    def resolve_load_store_function(name)
+      case name
+      when :pig_storage
+        'PigStorage'
+      else
+        name
+      end
+    end
+  end
+  
   class Assignment
     def initialize(relation)
       @relation = relation
@@ -69,6 +80,7 @@ module Piglet
   
   class Load
     include Relation
+    include LoadAndStore
     
     def initialize(path, options={})
       @path, @using, @schema = path, options[:using], options[:schema]
@@ -76,22 +88,13 @@ module Piglet
     
     def to_s
       str  = "LOAD '#{@path}'"
-      str << " USING #{function}" if @using
+      str << " USING #{resolve_load_store_function(@using)}" if @using
       str << " AS (#{schema_string})" if @schema
       str
     end
     
   private
-    
-    def function
-      case @using
-      when :pig_storage
-        'PigStorage'
-      else
-        @using
-      end
-    end
-    
+        
     def schema_string
       @schema.map do |field|
         if field.is_a?(Enumerable)
@@ -105,6 +108,8 @@ module Piglet
   end
   
   class Store
+    include LoadAndStore
+    
     attr_reader :relation
     
     def initialize(relation, path, options={})
@@ -113,7 +118,7 @@ module Piglet
     
     def to_s
       str  = "STORE #{relation.name} INTO '#{@path}'"
-      str << " USING #{@using}" if @using
+      str << " USING #{resolve_load_store_function(@using)}" if @using
       str
     end
   end
