@@ -104,6 +104,22 @@ module Piglet
     def distinct(options={})
       Distinct.new(self, options)
     end
+    
+    def cogroup; raise NotSupportedError; end
+    def cross; raise NotSupportedError; end
+    def dump; raise NotSupportedError; end
+    def filter; raise NotSupportedError; end
+    def foreach; raise NotSupportedError; end
+    def example; raise NotSupportedError; end
+    def join; raise NotSupportedError; end
+    def limit; raise NotSupportedError; end
+    def load; raise NotSupportedError; end
+    def order; raise NotSupportedError; end
+    def sample; raise NotSupportedError; end
+    def split; raise NotSupportedError; end
+    def store; raise NotSupportedError; end
+    def stream; raise NotSupportedError; end
+    def union; raise NotSupportedError; end
 
     def hash
       self.alias.hash
