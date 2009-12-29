@@ -2,8 +2,6 @@ module Piglet
   class Load
     def initialize(path)
       @path = path
-      @method = nil
-      @fields = nil
     end
     
     def using(method)
@@ -11,15 +9,15 @@ module Piglet
       self
     end
     
-    def as(*fields)
-      @fields = fields
+    def as(*schema)
+      @schema = schema
       self
     end
     
     def to_pig_latin
       str = "LOAD '#{@path}'"
       str << " USING #{method_name}" if @method
-      str << " AS (#{field_list})" if @fields
+      str << " AS (#{schema_string})" if @schema
       str
     end
   
@@ -34,8 +32,8 @@ module Piglet
       end
     end
     
-    def field_list
-      @fields.map do |field|
+    def schema_string
+      @schema.map do |field|
         if field.is_a?(Enumerable)
           field.map { |f| f.to_s }.join(':')
         else

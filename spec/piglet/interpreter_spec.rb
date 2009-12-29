@@ -49,6 +49,11 @@ describe Piglet::Interpreter do
       @interpreter.interpret { load('some/path').as(:a, [:b, :chararray], :c) }
       @interpreter.to_pig_latin.should eql(%{LOAD 'some/path' AS (a, b:chararray, c);})
     end
+    
+    it 'constructs a LOAD statement with an AS clause with types specified as both strings and symbols' do
+      @interpreter.interpret { load('some/path').as(:a, %w(b chararray), :c) }
+      @interpreter.to_pig_latin.should eql(%{LOAD 'some/path' AS (a, b:chararray, c);})
+    end
   end
   
   context 'multiple statements' do
