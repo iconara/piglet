@@ -79,5 +79,17 @@ describe Piglet::Interpreter do
       @interpreter.to_pig_latin.should match(/STORE \w+ INTO 'out' USING PigStorage/)
     end
   end
-  
+
+  describe 'aliasing' do
+    it 'aliases the loaded relation and uses the same alias in the STORE statement' do
+      @interpreter.interpret { store(load('in'), 'out') }
+      @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\nSTORE \1 INTO 'out';/)
+    end
+    
+    it 'aliases both a loaded relation and a grouped relation and uses the latter in the STORE statement' do
+      @interpreter.interpret { store(load('in', :schema => [:a]).group(:a), 'out') }
+      @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in' AS \(a\);\n(\w+) = GROUP \1 BY a;\nSTORE \2 INTO 'out';/)
+    end
+  end
+
 end

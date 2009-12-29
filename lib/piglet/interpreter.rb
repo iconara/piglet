@@ -18,23 +18,29 @@ module Piglet
     end
     
     def to_pig_latin
+      return '' if @stores.empty?
+      
       statements = [ ]
       
       @stores.each do |store|
-        statements << Assignment.new(store.relation)
+        statements << source_tree(store.relation)
         statements << store
+        statements
       end
       
-      #puts statements
-      
-      if statements.empty?
-        ''
-      else
-        statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
-      end
+      statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
     end
     
   private
+  
+    def source_tree(relation)
+      if relation.source
+        tree = source_tree(relation.source)
+      else
+        tree = []
+      end
+      tree + [Assignment.new(relation)]
+    end
     
     def load(path, options={})
       Load.new(path, options)
@@ -46,14 +52,22 @@ module Piglet
   end
   
   module Relation
+    attr_reader :source
+        
+    def name
+      @name ||= Relation.next_name
+    end
+    
+    def group(*grouping)
+      Group.new(self, grouping)
+    end
+    
+  private
+  
     def self.next_name
       @counter ||= 0
       @counter += 1
       "relation_#{@counter}"
-    end
-    
-    def name
-      @name ||= Relation.next_name
     end
   end
   
@@ -75,6 +89,24 @@ module Piglet
     
     def to_s
       "#{@relation.name} = #{@relation.to_s}"
+    end
+  end
+  
+  class Group
+    include Relation
+    
+    def initialize(relation, grouping)
+      @source, @grouping = relation, grouping
+    end
+    
+    def to_s
+      str = "GROUP #{@source.name} BY "
+      if @grouping.size > 1
+        str << "(#{grouping.join(',')})"
+      else
+        str << @grouping.first.to_s
+      end
+      str
     end
   end
   
