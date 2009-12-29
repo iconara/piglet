@@ -7,18 +7,20 @@ describe Piglet::Interpreter do
     @interpreter = Piglet::Interpreter.new
   end
 
-  it 'interprets a block given to #new' do
-    output = Piglet::Interpreter.new { store(load('some/path'), 'out') }
-    output.to_pig_latin.should_not be_empty
-  end
+  context 'basic usage' do
+    it 'interprets a block given to #new' do
+      output = Piglet::Interpreter.new { store(load('some/path'), 'out') }
+      output.to_pig_latin.should_not be_empty
+    end
   
-  it 'interprets a block given to #interpret' do
-    output = @interpreter.interpret { store(load('some/path'), 'out') }
-    output.to_pig_latin.should_not be_empty
-  end
+    it 'interprets a block given to #interpret' do
+      output = @interpreter.interpret { store(load('some/path'), 'out') }
+      output.to_pig_latin.should_not be_empty
+    end
 
-  it 'does nothing with no commands' do
-    @interpreter.interpret.to_pig_latin.should be_empty
+    it 'does nothing with no commands' do
+      @interpreter.interpret.to_pig_latin.should be_empty
+    end
   end
     
   describe 'LOAD' do
@@ -113,6 +115,35 @@ describe Piglet::Interpreter do
     end
   end
 
+  describe 'GROUP' do
+    it 'outputs a GROUP statement with one grouping field' do
+      @interpreter.interpret { store(load('in').group(:a), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY a/)
+    end
+    
+    it 'outputs a GROUP statement with more than one grouping field' do
+      @interpreter.interpret { store(load('in').group(:a, :b, :c), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\)/)
+    end
+    
+    it 'outputs a GROUP statement with a PARALLEL clause' do
+      @interpreter.interpret { store(load('in').group([:a, :b, :c], :parallel => 3), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\) PARALLEL 3/)
+    end
+  end
+  
+  describe 'DISTINCT' do
+    it 'outputs a DISTINCT statement' do
+      @interpreter.interpret { store(load('in').distinct, 'out') }
+      @interpreter.to_pig_latin.should match(/DISTINCT \w+/)
+    end
+    
+    it 'outputs a DISTINCT statement with a PARALLEL clause' do
+      @interpreter.interpret { store(load('in').distinct(:parallel => 4), 'out') }
+      @interpreter.to_pig_latin.should match(/DISTINCT \w+ PARALLEL 4/)
+    end
+  end
+
   context 'aliasing & multiple statements' do
     it 'aliases the loaded relation and uses the same alias in the STORE statement' do
       @interpreter.interpret { store(load('in'), 'out') }
@@ -143,35 +174,6 @@ describe Piglet::Interpreter do
         store(b, 'out2')
       end
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\n(\w+) = DISTINCT \1;\nSTORE \2 INTO 'out1';\nSTORE \2 INTO 'out2';/)
-    end
-  end
-
-  describe 'GROUP' do
-    it 'outputs a GROUP statement with one grouping field' do
-      @interpreter.interpret { store(load('in').group(:a), 'out') }
-      @interpreter.to_pig_latin.should match(/GROUP \w+ BY a/)
-    end
-    
-    it 'outputs a GROUP statement with more than one grouping field' do
-      @interpreter.interpret { store(load('in').group(:a, :b, :c), 'out') }
-      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\)/)
-    end
-    
-    it 'outputs a GROUP statement with a PARALLEL clause' do
-      @interpreter.interpret { store(load('in').group([:a, :b, :c], :parallel => 3), 'out') }
-      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\) PARALLEL 3/)
-    end
-  end
-  
-  describe 'DISTINCT' do
-    it 'outputs a DISTINCT statement' do
-      @interpreter.interpret { store(load('in').distinct, 'out') }
-      @interpreter.to_pig_latin.should match(/DISTINCT \w+/)
-    end
-    
-    it 'outputs a DISTINCT statement with a PARALLEL clause' do
-      @interpreter.interpret { store(load('in').distinct(:parallel => 4), 'out') }
-      @interpreter.to_pig_latin.should match(/DISTINCT \w+ PARALLEL 4/)
     end
   end
 
