@@ -104,14 +104,31 @@ describe Piglet::Interpreter do
   end
 
   describe 'GROUP' do
-    it 'outputs a correct GROUP statement with one grouping field' do
+    it 'outputs a GROUP statement with one grouping field' do
       @interpreter.interpret { store(load('in').group(:a), 'out') }
       @interpreter.to_pig_latin.should match(/GROUP \w+ BY a/)
     end
     
-    it 'outputs a correct GROUP statement with more than one grouping field' do
+    it 'outputs a GROUP statement with more than one grouping field' do
       @interpreter.interpret { store(load('in').group(:a, :b, :c), 'out') }
       @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\)/)
+    end
+    
+    it 'outputs a GROUP statement with a PARALLEL clause' do
+      @interpreter.interpret { store(load('in').group([:a, :b, :c], :parallel => 3), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\) PARALLEL 3/)
+    end
+  end
+  
+  describe 'DISTINCT' do
+    it 'outputs a DISTINCT statement' do
+      @interpreter.interpret { store(load('in').distinct, 'out') }
+      @interpreter.to_pig_latin.should match(/DISTINCT \w+/)
+    end
+    
+    it 'outputs a DISTINCT statement with a PARALLEL clause' do
+      @interpreter.interpret { store(load('in').distinct(:parallel => 4), 'out') }
+      @interpreter.to_pig_latin.should match(/DISTINCT \w+ PARALLEL 4/)
     end
   end
 

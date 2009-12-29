@@ -58,8 +58,29 @@ module Piglet
       @alias ||= Relation.next_alias
     end
     
-    def group(*grouping)
-      Group.new(self, grouping)
+    # group(:a)                           # => GROUP x By a
+    # group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
+    # group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
+    def group(*args)
+      grouping = [ ]
+      options = nil
+      args.each do |a|
+        case a
+        when Hash
+          options = a
+          break
+        when Array
+          grouping += a
+        else
+          grouping << a
+        end
+      end
+      
+      Group.new(self, grouping, options)
+    end
+    
+    def distinct(options={})
+      Distinct.new(self, options)
     end
     
   private
@@ -95,8 +116,9 @@ module Piglet
   class Group
     include Relation
     
-    def initialize(relation, grouping)
-      @source, @grouping = relation, grouping
+    def initialize(relation, grouping, options={})
+      options ||= {}
+      @source, @grouping, @parallel = relation, grouping, options[:parallel]
     end
     
     def to_s
@@ -106,6 +128,22 @@ module Piglet
       else
         str << @grouping.first.to_s
       end
+      str << " PARALLEL #{@parallel}" if @parallel
+      str
+    end
+  end
+  
+  class Distinct
+    include Relation
+    
+    def initialize(relation, options={})
+      options ||= {}
+      @source, @parallel = relation, options[:parallel]
+    end
+    
+    def to_s
+      str  = "DISTINCT #{@source.alias}"
+      str << " PARALLEL #{@parallel}" if @parallel
       str
     end
   end
@@ -115,6 +153,7 @@ module Piglet
     include LoadAndStore
     
     def initialize(path, options={})
+      options ||= {}
       @path, @using, @schema = path, options[:using], options[:schema]
     end
     

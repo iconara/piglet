@@ -28,4 +28,10 @@ describe Piglet::Relation do
     end
   end
   
+  describe '#distinct' do
+    it 'returns a new relation with the target relation as source' do
+      @relation.distinct.source.should == @relation
+    end
+  end
+  
 end
