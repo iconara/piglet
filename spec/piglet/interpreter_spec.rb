@@ -80,7 +80,7 @@ describe Piglet::Interpreter do
     end
   end
 
-  describe 'aliasing' do
+  context 'aliasing & multiple statements' do
     it 'aliases the loaded relation and uses the same alias in the STORE statement' do
       @interpreter.interpret { store(load('in'), 'out') }
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\nSTORE \1 INTO 'out';/)
@@ -100,6 +100,16 @@ describe Piglet::Interpreter do
         store(d, 'out')
       end
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in' AS \(a\);\n(\w+) = GROUP \1 BY a;\n(\w+) = GROUP \2 BY a;\n(\w+) = GROUP \3 BY a;\nSTORE \4 INTO 'out';/)
+    end
+    
+    it 'outputs the statements for an alias only once, regardless of home many times it is stored' do
+      @interpreter.interpret do
+        a = load('in')
+        b = a.distinct
+        store(b, 'out1')
+        store(b, 'out2')
+      end
+      @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\n(\w+) = DISTINCT \1;\nSTORE \2 INTO 'out1';\nSTORE \2 INTO 'out2';/)
     end
   end
 

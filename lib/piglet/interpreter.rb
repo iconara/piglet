@@ -20,12 +20,15 @@ module Piglet
     def to_pig_latin
       return '' if @stores.empty?
       
+      handled_relations = Set.new
       statements = [ ]
       
       @stores.each do |store|
-        statements << source_tree(store.relation)
+        relation_prerequisites(store.relation).each do |preq|
+          statements << preq unless handled_relations.include?(preq.target)
+          handled_relations << preq.target
+        end
         statements << store
-        statements
       end
       
       statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
@@ -33,13 +36,13 @@ module Piglet
     
   private
   
-    def source_tree(relation)
+    def relation_prerequisites(relation)
+      assignment = Assignment.new(relation)
       if relation.source
-        tree = source_tree(relation.source)
+        relation_prerequisites(relation.source) + [assignment]
       else
-        tree = []
+        [assignment]
       end
-      tree + [Assignment.new(relation)]
     end
     
     def load(path, options={})
@@ -82,6 +85,14 @@ module Piglet
     def distinct(options={})
       Distinct.new(self, options)
     end
+
+    def hash
+      self.alias.hash
+    end
+    
+    def eql?(other)
+      other.is_a(Relation) && other.alias == self.alias
+    end
     
   private
   
@@ -104,12 +115,14 @@ module Piglet
   end
   
   class Assignment
+    attr_reader :target
+    
     def initialize(relation)
-      @relation = relation
+      @target = relation
     end
     
     def to_s
-      "#{@relation.alias} = #{@relation.to_s}"
+      "#{@target.alias} = #{@target.to_s}"
     end
   end
   
