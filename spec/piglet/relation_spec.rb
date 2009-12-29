@@ -8,17 +8,17 @@ describe Piglet::Relation do
     @relation.extend Piglet::Relation
   end
   
-  it 'has a name' do
-    @relation.name.should_not be_nil
+  it 'has a alias' do
+    @relation.alias.should_not be_nil
   end
   
-  it 'has a unique name' do
-    names = { }
+  it 'has a unique alias' do
+    aliases = { }
     1000.times do
       @relation = Object.new
       @relation.extend Piglet::Relation
-      names.should_not have_key(@relation.name)
-      names[@relation.name] = @relation
+      aliases.should_not have_key(@relation.alias)
+      aliases[@relation.alias] = @relation
     end
   end
   

@@ -54,8 +54,8 @@ module Piglet
   module Relation
     attr_reader :source
         
-    def name
-      @name ||= Relation.next_name
+    def alias
+      @alias ||= Relation.next_alias
     end
     
     def group(*grouping)
@@ -64,7 +64,7 @@ module Piglet
     
   private
   
-    def self.next_name
+    def self.next_alias
       @counter ||= 0
       @counter += 1
       "relation_#{@counter}"
@@ -88,7 +88,7 @@ module Piglet
     end
     
     def to_s
-      "#{@relation.name} = #{@relation.to_s}"
+      "#{@relation.alias} = #{@relation.to_s}"
     end
   end
   
@@ -100,7 +100,7 @@ module Piglet
     end
     
     def to_s
-      str = "GROUP #{@source.name} BY "
+      str = "GROUP #{@source.alias} BY "
       if @grouping.size > 1
         str << "(#{grouping.join(',')})"
       else
@@ -149,7 +149,7 @@ module Piglet
     end
     
     def to_s
-      str  = "STORE #{relation.name} INTO '#{@path}'"
+      str  = "STORE #{relation.alias} INTO '#{@path}'"
       str << " USING #{resolve_load_store_function(@using)}" if @using
       str
     end

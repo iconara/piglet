@@ -90,6 +90,17 @@ describe Piglet::Interpreter do
       @interpreter.interpret { store(load('in', :schema => [:a]).group(:a), 'out') }
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in' AS \(a\);\n(\w+) = GROUP \1 BY a;\nSTORE \2 INTO 'out';/)
     end
+    
+    it 'aliases a whole row of statements' do
+      @interpreter.interpret do
+        a = load('in', :schema => [:a])
+        b = a.group(:a)
+        c = b.group(:a)
+        d = c.group(:a)
+        store(d, 'out')
+      end
+      @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in' AS \(a\);\n(\w+) = GROUP \1 BY a;\n(\w+) = GROUP \2 BY a;\n(\w+) = GROUP \3 BY a;\nSTORE \4 INTO 'out';/)
+    end
   end
 
 end
