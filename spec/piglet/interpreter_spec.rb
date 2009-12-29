@@ -100,6 +100,18 @@ describe Piglet::Interpreter do
       @interpreter.to_pig_latin.should match(/DESCRIBE \w+/)
     end
   end
+  
+  describe 'EXPLAIN' do
+    it 'outputs an EXPLAIN statement' do
+      @interpreter.interpret { explain(load('some/path')) }
+      @interpreter.to_pig_latin.should match(/EXPLAIN \w+/)
+    end
+    
+    it 'outputs an EXPLAIN statement without an alias' do
+      @interpreter.interpret { explain }
+      @interpreter.to_pig_latin.should match(/EXPLAIN;/)
+    end
+  end
 
   context 'aliasing & multiple statements' do
     it 'aliases the loaded relation and uses the same alias in the STORE statement' do

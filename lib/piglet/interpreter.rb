@@ -24,9 +24,11 @@ module Piglet
       statements = [ ]
       
       @stores.each do |store|
-        relation_prerequisites(store.relation).each do |preq|
-          statements << preq unless handled_relations.include?(preq.target)
-          handled_relations << preq.target
+        unless store.relation.nil?
+          relation_prerequisites(store.relation).each do |preq|
+            statements << preq unless handled_relations.include?(preq.target)
+            handled_relations << preq.target
+          end
         end
         statements << store
       end
@@ -63,6 +65,10 @@ module Piglet
     
     def describe(relation)
       @stores << Describe.new(relation)
+    end
+    
+    def explain(relation=nil)
+      @stores << Explain.new(relation)
     end
   end
   
@@ -241,5 +247,17 @@ module Piglet
   
   class Describe
     include Storing
+  end
+  
+  class Explain
+    include Storing
+    
+    def to_s
+      if relation.nil?
+        "EXPLAIN"
+      else
+        super
+      end
+    end
   end
 end
