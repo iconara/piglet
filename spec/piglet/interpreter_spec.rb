@@ -103,4 +103,16 @@ describe Piglet::Interpreter do
     end
   end
 
+  describe 'GROUP' do
+    it 'outputs a correct GROUP statement with one grouping field' do
+      @interpreter.interpret { store(load('in').group(:a), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY a/)
+    end
+    
+    it 'outputs a correct GROUP statement with more than one grouping field' do
+      @interpreter.interpret { store(load('in').group(:a, :b, :c), 'out') }
+      @interpreter.to_pig_latin.should match(/GROUP \w+ BY \(a, b, c\)/)
+    end
+  end
+
 end

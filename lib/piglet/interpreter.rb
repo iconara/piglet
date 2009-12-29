@@ -102,7 +102,7 @@ module Piglet
     def to_s
       str = "GROUP #{@source.alias} BY "
       if @grouping.size > 1
-        str << "(#{grouping.join(',')})"
+        str << "(#{@grouping.join(', ')})"
       else
         str << @grouping.first.to_s
       end

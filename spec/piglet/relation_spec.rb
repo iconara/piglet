@@ -23,7 +23,7 @@ describe Piglet::Relation do
   end
   
   describe '#group' do
-    it 'returns a new relation with the relation as source' do
+    it 'returns a new relation with the target relation as source' do
       @relation.group(:a).source.should == @relation
     end
   end
