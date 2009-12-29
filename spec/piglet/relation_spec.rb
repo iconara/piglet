@@ -50,4 +50,16 @@ describe Piglet::Relation do
     end
   end
   
+  describe '#sample' do
+    it 'returns a new relation with the target relation as source' do
+      @relation.sample(10).sources.should include(@relation)
+    end
+  end
+
+  describe '#limit' do
+    it 'returns a new relation with the target relation as source' do
+      @relation.limit(42).sources.should include(@relation)
+    end
+  end
+  
 end

@@ -148,7 +148,9 @@ module Piglet
     def join; raise NotSupportedError; end
     
     # x.limit(10) # => LIMIT x 10
-    def limit; raise NotSupportedError; end
+    def limit(n)
+      Limit.new(self, n)
+    end
     
     # x.order(:a)                      # => ORDER x BY a
     # x.order(:a, :b)                  # => ORDER x BY a, b
@@ -160,7 +162,9 @@ module Piglet
     def order; raise NotSupportedError; end
     
     # x.sample(5) # => SAMPLE x 5;
-    def sample; raise NotSupportedError; end
+    def sample(n)
+      Sample.new(self, n)
+    end
     
     # TODO: this one is tricky since it's assignment, but also a relation operation
     def split; raise NotSupportedError; end
@@ -311,6 +315,30 @@ module Piglet
   
     def source_aliases
       @sources.map { |s| s.alias }
+    end
+  end
+  
+  class Sample
+    include Relation
+    
+    def initialize(relation, n)
+      @sources, @n = [relation], n
+    end
+    
+    def to_s
+      "SAMPLE #{@sources.first.alias} #{@n}"
+    end
+  end
+  
+  class Limit
+    include Relation
+    
+    def initialize(relation, n)
+      @sources, @n = [relation], n
+    end
+    
+    def to_s
+      "LIMIT #{@sources.first.alias} #{@n}"
     end
   end
   

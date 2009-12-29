@@ -207,6 +207,20 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/UNION \w+, \w+, \w+, \w+/)
       end
     end
+    
+    describe 'SAMPLE' do
+      it 'outputs a SAMPLE statement' do
+        @interpreter.interpret { dump(load('in').sample(10)) }
+        @interpreter.to_pig_latin.should match(/SAMPLE \w+ 10/)
+      end
+    end
+
+    describe 'LIMIT' do
+      it 'outputs a LIMIT statement' do
+        @interpreter.interpret { dump(load('in').limit(42)) }
+        @interpreter.to_pig_latin.should match(/LIMIT \w+ 42/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do
