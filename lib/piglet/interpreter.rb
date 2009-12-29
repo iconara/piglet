@@ -35,7 +35,50 @@ module Piglet
       
       statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
     end
-    
+  
+  protected
+  
+    # load('some/path')                                         # => LOAD 'some/path'
+    # load('some/path', :using => 'Xyz')                        # => LOAD 'some/path' USING Xyz
+    # load('some/path', :using => :pig_storage)                 # => LOAD 'some/path' USING PigStorage
+    # load('some/path', :schema => [:a, :b])                    # => LOAD 'some/path' AS (a, b)
+    # load('some/path', :schema => %w(a b c d))                 # => LOAD 'some/path' AS (a, b, c, d)
+    # load('some/path', :schema => [%w(a chararray), %(b int)]) # => LOAD 'some/path' AS (a:chararray, b:int)
+    #
+    # NOTE: the syntax load('path', :schema => {:a => :chararray, :b => :int})
+    # would be nice, but the order of the keys can't be guaranteed in Ruby 1.8.
+    def load(path, options={})
+      Load.new(path, options)
+    end
+  
+    # store(x, 'some/path') # => STORE x INTO 'some/path'
+    # store(x, 'some/path', :using => 'Xyz') # => STORE x INTO 'some/path' USING Xyz
+    # store(x, 'some/path', :using => :pig_storage) # => STORE x INTO 'some/path' USING PigStorage
+    def store(relation, path, options={})
+      @stores << Store.new(relation, path, options)
+    end
+  
+    # dump(x) # => DUMP x
+    def dump(relation)
+      @stores << Dump.new(relation)
+    end
+  
+    # illustrate(x) # => ILLUSTRATE x
+    def illustrate(relation)
+      @stores << Illustrate.new(relation)
+    end
+  
+    # describe(x) # => DESCRIBE x
+    def describe(relation)
+      @stores << Describe.new(relation)
+    end
+  
+    # explain    # => EXPLAIN
+    # explain(x) # => EXPLAIN(x)
+    def explain(relation=nil)
+      @stores << Explain.new(relation)
+    end
+  
   private
   
     def assignments(relation, ignore_set)
@@ -48,29 +91,6 @@ module Piglet
       end
     end
     
-    def load(path, options={})
-      Load.new(path, options)
-    end
-    
-    def store(relation, path, options={})
-      @stores << Store.new(relation, path, options)
-    end
-    
-    def dump(relation)
-      @stores << Dump.new(relation)
-    end
-    
-    def illustrate(relation)
-      @stores << Illustrate.new(relation)
-    end
-    
-    def describe(relation)
-      @stores << Describe.new(relation)
-    end
-    
-    def explain(relation=nil)
-      @stores << Explain.new(relation)
-    end
   end
   
   module Relation
@@ -80,9 +100,9 @@ module Piglet
       @alias ||= Relation.next_alias
     end
     
-    # group(:a)                           # => GROUP x By a
-    # group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
-    # group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
+    # x.group(:a)                           # => GROUP x By a
+    # x.group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
+    # x.group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
     def group(*args)
       grouping = [ ]
       options = nil
@@ -101,24 +121,71 @@ module Piglet
       Group.new(self, grouping, options)
     end
     
+    # x.distinct                 # => DISTINCT x
+    # x.distinct(:parallel => 5) # => DISTINCT x PARALLEL 5
     def distinct(options={})
       Distinct.new(self, options)
     end
-    
+
+    # x.cogroup(y, x => :a, y => :b)                 # => COGROUP x BY a, y BY b
+    # x.cogroup([y, z], x => :a, y => :b, z => :c)   # => COGROUP x BY a, y BY b, z BY c
+    # x.cogroup(y, x => [:a, :b], y => [:c, :d])     # => COGROUP x BY (a, b), y BY (c, d)
+    # x.cogroup(y, x => :a, y => [:b, :inner])       # => COGROUP x BY a, y BY b INNER
+    # x.cogroup(y, x => :a, y => :b, :parallel => 5) # => COGROUP x BY a, y BY b PARALLEL 5
     def cogroup; raise NotSupportedError; end
+    
+    # x.cross(y)                      # => CROSS x, y
+    # x.cross(y, z, w)                # => CROSS x, y, z, w
+    # x.cross([y, z], :parallel => 5) # => CROSS x, y, z, w PARALLEL 5
     def cross; raise NotSupportedError; end
-    def dump; raise NotSupportedError; end
+    
+    # x.filter(:a.eql(:b))                   # => FILTER x BY a == b
+    # x.filter(:a.gt(:b).and(:c.not_eql(3))) # => FILTER x BY a > b AND c != 3
     def filter; raise NotSupportedError; end
+    
+    # x.foreach { |r| r.a }            # => FOREACH x GENERATE a
+    # x.foreach { |r| [r.a, r.b] }     # => FOREACH x GENERATE a, b
+    # x.foreach { |r| r.a.max }        # => FOREACH x GENERATE MAX(a)
+    # x.foreach { |r| r.a.avg.as(:b) } # => FOREACH x GENERATE AVG(a) AS b
+    #
+    # TODO: FOREACH a { b GENERATE c }
     def foreach; raise NotSupportedError; end
-    def example; raise NotSupportedError; end
+    
+    # x.join(y, x => :a, y => :b)                        # => JOIN x BY a, y BY b
+    # x.join([y, z], x => :a, y => :b, z => :c)          # => JOIN x BY a, y BY b, z BY c
+    # x.join(y, x => :a, y => :b, :using => :replicated) # => JOIN x BY a, y BY b USING "replicated"
+    # x.join(y, x => :a, y => :b, :parallel => 5)        # => JOIN x BY a, y BY b PARALLEL 5
     def join; raise NotSupportedError; end
+    
+    # x.limit(10) # => LIMIT x 10
     def limit; raise NotSupportedError; end
-    def load; raise NotSupportedError; end
+    
+    # x.order(:a)                      # => ORDER x BY a
+    # x.order(:a, :b)                  # => ORDER x BY a, b
+    # x.order([:a, :asc], [:b, :desc]) # => ORDER x BY a ASC, b DESC
+    # x.order(:a, :parallel => 5)      # => ORDER x BY a PARALLEL 5
+    #
+    # NOTE: the syntax x.order(:a => :asc, :b => :desc) would be nice, but in
+    # Ruby 1.8 the order of the keys cannot be guaranteed.
     def order; raise NotSupportedError; end
+    
+    # x.sample(5) # => SAMPLE x 5;
     def sample; raise NotSupportedError; end
+    
+    # TODO: this one is tricky since it's assignment, but also a relation operation
     def split; raise NotSupportedError; end
-    def store; raise NotSupportedError; end
-    def stream; raise NotSupportedError; end
+    
+    # x.stream(x, 'cut -f 3')                         # => STREAM x THROUGH `cut -f 3`
+    # x.stream([x, y], 'cut -f 3')                    # => STREAM x, y THROUGH `cut -f 3`
+    # x.stream(x, 'cut -f 3', :schema => [%w(a int)]) # => STREAM x THROUGH `cut -f 3` AS (a:int)
+    #
+    # TODO: how to handle DEFINE'd commands?
+    def stream(relations, command, options={})
+      raise NotSupportedError
+    end
+    
+    # x.union(y)    # => UNION x, y
+    # x.union(y, z) # => UNION x, y, z
     def union; raise NotSupportedError; end
 
     def hash
@@ -277,4 +344,5 @@ module Piglet
       end
     end
   end
+
 end
