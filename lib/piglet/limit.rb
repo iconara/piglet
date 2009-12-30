@@ -1,5 +1,5 @@
 module Piglet
-  class Limit
+  class Limit # :nodoc:
     include Relation
     
     def initialize(relation, n)

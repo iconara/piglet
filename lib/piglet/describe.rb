@@ -1,5 +1,5 @@
 module Piglet
-  class Describe
+  class Describe # :nodoc:
     include Storing
   end
 end

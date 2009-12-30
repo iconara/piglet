@@ -37,13 +37,17 @@ module Piglet
     end
   
   protected
-  
-    # load('some/path')                                         # => LOAD 'some/path'
-    # load('some/path', :using => 'Xyz')                        # => LOAD 'some/path' USING Xyz
-    # load('some/path', :using => :pig_storage)                 # => LOAD 'some/path' USING PigStorage
-    # load('some/path', :schema => [:a, :b])                    # => LOAD 'some/path' AS (a, b)
-    # load('some/path', :schema => %w(a b c d))                 # => LOAD 'some/path' AS (a, b, c, d)
-    # load('some/path', :schema => [%w(a chararray), %(b int)]) # => LOAD 'some/path' AS (a:chararray, b:int)
+
+    # LOAD
+    #
+    #   load('some/path')                                         # => LOAD 'some/path'
+    #   load('some/path', :using => 'Xyz')                        # => LOAD 'some/path' USING Xyz
+    #   load('some/path', :using => :pig_storage)                 # => LOAD 'some/path' USING PigStorage
+    #   load('some/path', :schema => [:a, :b])                    # => LOAD 'some/path' AS (a, b)
+    #   load('some/path', :schema => %w(a b c d))                 # => LOAD 'some/path' AS (a, b, c, d)
+    #   load('some/path', :schema => [%w(a chararray), %(b int)]) # => LOAD 'some/path' AS (a:chararray, b:int)
+    #
+    #--
     #
     # NOTE: the syntax load('path', :schema => {:a => :chararray, :b => :int})
     # would be nice, but the order of the keys can't be guaranteed in Ruby 1.8.
@@ -51,30 +55,40 @@ module Piglet
       Load.new(path, options)
     end
   
-    # store(x, 'some/path') # => STORE x INTO 'some/path'
-    # store(x, 'some/path', :using => 'Xyz') # => STORE x INTO 'some/path' USING Xyz
-    # store(x, 'some/path', :using => :pig_storage) # => STORE x INTO 'some/path' USING PigStorage
+    # STORE
+    #
+    #   store(x, 'some/path') # => STORE x INTO 'some/path'
+    #   store(x, 'some/path', :using => 'Xyz') # => STORE x INTO 'some/path' USING Xyz
+    #   store(x, 'some/path', :using => :pig_storage) # => STORE x INTO 'some/path' USING PigStorage
     def store(relation, path, options={})
       @stores << Store.new(relation, path, options)
     end
   
-    # dump(x) # => DUMP x
+    # DUMP
+    #
+    #   dump(x) # => DUMP x
     def dump(relation)
       @stores << Dump.new(relation)
     end
   
-    # illustrate(x) # => ILLUSTRATE x
+    # ILLUSTRATE
+    #
+    #   illustrate(x) # => ILLUSTRATE x
     def illustrate(relation)
       @stores << Illustrate.new(relation)
     end
   
-    # describe(x) # => DESCRIBE x
+    # DESCRIBE
+    #
+    #   describe(x) # => DESCRIBE x
     def describe(relation)
       @stores << Describe.new(relation)
     end
   
-    # explain    # => EXPLAIN
-    # explain(x) # => EXPLAIN(x)
+    # EXPLAIN
+    #
+    #   explain    # => EXPLAIN
+    #   explain(x) # => EXPLAIN(x)
     def explain(relation=nil)
       @stores << Explain.new(relation)
     end

@@ -1,5 +1,5 @@
 module Piglet
-  class Distinct
+  class Distinct # :nodoc:
     include Relation
     
     def initialize(relation, options={})

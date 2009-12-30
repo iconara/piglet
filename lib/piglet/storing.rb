@@ -1,5 +1,5 @@
 module Piglet
-  module Storing
+  module Storing # :nodoc:
     attr_reader :relation
     
     def initialize(relation)

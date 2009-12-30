@@ -1,5 +1,5 @@
 module Piglet
-  class Load
+  class Load # :nodoc:
     include Relation
     include LoadAndStore
     

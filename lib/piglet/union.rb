@@ -1,5 +1,5 @@
 module Piglet
-  class Union
+  class Union # :nodoc:
     include Relation
     
     def initialize(*relations)

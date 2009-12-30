@@ -1,5 +1,5 @@
 module Piglet
-  class Illustrate
+  class Illustrate # :nodoc:
     include Storing
   end
 end

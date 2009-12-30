@@ -2,9 +2,15 @@
 
 Piglet is a DSL for writing Pig Latin scripts in Ruby:
 
-  a = load 'input', :schema => [:x, :y, :z]
-  b = a.group(:y)
-  store(b, 'output')
+  a = load 'input'
+  b = a.group :c
+  store b, 'output'
+  
+The code above will be translated to the following Pig Latin:
+
+  relation_2 = LOAD 'input';
+  relation_1 = GROUP relation_2 BY c;
+  STORE relation_1 INTO 'output';
   
 The aim is to support most of Pig Latin, but currently there are some limitations.
 
@@ -12,19 +18,7 @@ The aim is to support most of Pig Latin, but currently there are some limitation
 
 === Why aren't the aliases in the Pig Latin the same as the variable names in the Piglet script?
 
-When you run +piglet+ on a Piglet script the aliases in the output will be +relation_1+, +relation_2+, +relation_3+, and so on, instead of the names of the variables of the Piglet script.
-
-This Piglet code:
-
-  a = load 'input'
-  b = a.group :c
-  store b, 'output'
-  
-Will result in this Pig Latin:
-
-  relation_2 = LOAD 'input';
-  relation_1 = GROUP relation_2 BY c;
-  STORE relation_1 INTO 'output';
+When you run +piglet+ on a Piglet script the aliases in the output will be <tt>relation_1</tt>, <tt>relation_2</tt>, <tt>relation_3</tt>, and so on, instead of the names of the variables of the Piglet script -- like in the example at the top of this document.
   
 The names +a+ and +b+ are lost in translation, this is unfortunate but hard to avoid. Firstly there is no way to discover the names of variables, and secondly there is no correspondence between a statement in a Piglet script and a statement in Pig Latin, +a.union(b, c).sample(3).group(:x)+ is at least three statements in Pig Latin. It simply wouldn't be worth the extra complexity of trying to infer some variable names and reuse them as aliases in the Pig Latin output.
 
@@ -32,7 +26,7 @@ In the future I may add a way of manually suggesting relation aliases, so that t
 
 You may also wonder why the relation aliases aren't in consecutive order. The reason is that they get their names in the order they are evaluated, and the interpreter walks the relation ancestry upwards from a +store+ (and it only evaluates a relation once).
 
-=== Why aren't all operations included in the output?
+=== Why aren’t all operations included in the output?
 
 If you try this Piglet code:
 
@@ -47,4 +41,4 @@ As a side effect of using +store+ and the other output operators as the trigger 
 
 == Copyright
 
-Copyright (c) 2009 Theo Hultberg / Iconara. See LICENSE for details.
+© 2009-2010 Theo Hultberg / Iconara. See LICENSE for details.

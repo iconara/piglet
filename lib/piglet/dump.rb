@@ -1,5 +1,5 @@
 module Piglet
-  class Dump
+  class Dump # :nodoc:
     include Storing
   end
 end

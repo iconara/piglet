@@ -1,5 +1,5 @@
 module Piglet
-  class Store
+  class Store # :nodoc:
     include LoadAndStore
     include Storing
     

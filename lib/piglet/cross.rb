@@ -1,5 +1,5 @@
 module Piglet
-  class Cross
+  class Cross # :nodoc:
     include Relation
     
     def initialize(relations, options={})

@@ -1,5 +1,5 @@
 module Piglet
-  class Explain
+  class Explain # :nodoc:
     include Storing
     
     def to_s

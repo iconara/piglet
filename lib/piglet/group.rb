@@ -1,5 +1,5 @@
 module Piglet
-  class Group
+  class Group # :nodoc:
     include Relation
     
     def initialize(relation, grouping, options={})

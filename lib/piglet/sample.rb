@@ -1,5 +1,5 @@
 module Piglet
-  class Sample
+  class Sample # :nodoc:
     include Relation
     
     def initialize(relation, n)

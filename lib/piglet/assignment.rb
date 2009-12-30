@@ -1,5 +1,5 @@
 module Piglet
-  class Assignment
+  class Assignment # :nodoc:
     attr_reader :target
     
     def initialize(relation)
