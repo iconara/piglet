@@ -1,6 +1,49 @@
 = Piglet
 
-Piglet is a DSL for writing Pig scripts in Ruby.
+Piglet is a DSL for writing Pig Latin scripts in Ruby:
+
+  a = load 'input', :schema => [:x, :y, :z]
+  b = a.group(:y)
+  store(b, 'output')
+  
+The aim is to support most of Pig Latin, but currently there are some limitations.
+
+== Oddities and implementation details
+
+=== Why aren't the aliases in the Pig Latin the same as the variable names in the Piglet script?
+
+When you run +piglet+ on a Piglet script the aliases in the output will be +relation_1+, +relation_2+, +relation_3+, and so on, instead of the names of the variables of the Piglet script.
+
+This Piglet code:
+
+  a = load 'input'
+  b = a.group :c
+  store b, 'output'
+  
+Will result in this Pig Latin:
+
+  relation_2 = LOAD 'input';
+  relation_1 = GROUP relation_2 BY c;
+  STORE relation_1 INTO 'output';
+  
+The names +a+ and +b+ are lost in translation, this is unfortunate but hard to avoid. Firstly there is no way to discover the names of variables, and secondly there is no correspondence between a statement in a Piglet script and a statement in Pig Latin, +a.union(b, c).sample(3).group(:x)+ is at least three statements in Pig Latin. It simply wouldn't be worth the extra complexity of trying to infer some variable names and reuse them as aliases in the Pig Latin output.
+
+In the future I may add a way of manually suggesting relation aliases, so that the Pig Latin output is more readable.
+
+You may also wonder why the relation aliases aren't in consecutive order. The reason is that they get their names in the order they are evaluated, and the interpreter walks the relation ancestry upwards from a +store+ (and it only evaluates a relation once).
+
+=== Why aren't all operations included in the output?
+
+If you try this Piglet code:
+
+  a = load 'input'
+  b = a.group :c
+  
+You might be surprised that Piglet will not output anything. In fact, Piglet only creates Pig Latin operations on relations that will somehow be outputed. Unless there is a +store+, +dump+, +describe+, +illustrate+ or +explain+ that outputs a relation, the operations applied to that relation and its ancestors will not be included.
+
+When you call +group+, +filter+ or any of the other methods that can be applied to a relation a datastructure that encodes these operations is created. When a relation is passed to +store+ or one of the other output operators the Piglet interpreter traverses the datastructure backwards, building the Pig Latin operations needed to arrive at the relation that should be passed to the output operator. This is similar to how Pig itself interprets a Pig Latin script.
+
+As a side effect of using +store+ and the other output operators as the trigger for creating the needed relational operations any relations that are not ancestors of relations that are outputed will not be included in the Pig Latin output. On the other hand, they would be no-ops when run by Pig anyway.
 
 == Copyright
 
