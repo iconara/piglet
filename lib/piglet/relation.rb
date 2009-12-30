@@ -59,7 +59,14 @@ module Piglet
     #--
     #
     # TODO: FOREACH a { b GENERATE c }
-    def foreach(&block); raise NotSupportedError; end
+    def foreach(*args)
+      if block_given?
+        field_expressions = yield self
+      else
+        field_expressions = args
+      end
+      Foreach.new(self, field_expressions)
+    end
   
     # JOIN
     #
@@ -124,6 +131,18 @@ module Piglet
     #   x.union(y, z) # => UNION x, y, z
     def union(*relations)
       Union.new(*([self] + relations))
+    end
+
+    def method_missing(name, *args)
+      if name.to_s =~ /^\w+$/ && args.empty?
+        Field.new(name, self)
+      else
+        super
+      end
+    end
+    
+    def [](n)
+      Field.new("\$#{n}", self)
     end
 
     def hash

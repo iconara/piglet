@@ -62,4 +62,18 @@ describe Piglet::Relation do
     end
   end
   
+  context 'fields' do
+    it 'returns a field for a message that does not correspond to a method' do
+      @relation.a.should_not be_nil
+    end
+    
+    it 'returns fields that have the correct name' do
+      @relation.a.to_s.should eql('a')
+    end
+    
+    it 'returns fields with positional notation' do
+      @relation[1].to_s.should eql('$1')
+    end
+  end
+  
 end

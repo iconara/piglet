@@ -221,6 +221,43 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/LIMIT \w+ 42/)
       end
     end
+
+    describe 'FOREACH … GENERATE' do
+      it 'outputs a FOREACH … GENERATE statement' do
+        @interpreter.interpret { dump(load('in').foreach { |r| :a }) }
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ GENERATE a/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement with a list of fields' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [:a, :b, :c] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ GENERATE a, b, c/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement with fields resolved from the relation' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [r.a, r.b, r.c] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a, b, c/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement with fields resolved from the relation with positional syntax' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [r[0], r[1], r[2]] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE \$0, \$1, \$2/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement with aggregate functions applied to the fields' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.max, r.b.min, r.c.avg] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE MAX\(a\), MIN\(b\), AVG\(c\)/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement with fields that access inner fields' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.b, r.b.c, r.c.d] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b, b.c, c.d/)
+      end
+      
+      it 'outputs a FOREACH … GENERATE statement that includes field aliasing' do
+        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.b.as(:c), r.a.b.as(:d)] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b AS c, a.b AS d/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do

@@ -1,21 +1,34 @@
 module Piglet
-  autoload :Assignment,   'piglet/assignment'
-  autoload :Cross,        'piglet/cross'
-  autoload :Describe,     'piglet/describe'
-  autoload :Distinct,     'piglet/distinct'
-  autoload :Dump,         'piglet/dump'
-  autoload :Explain,      'piglet/explain'
-  autoload :Group,        'piglet/group'
-  autoload :Illustrate,   'piglet/illustrate'
-  autoload :Interpreter,  'piglet/interpreter'
-  autoload :Limit,        'piglet/limit'
-  autoload :LoadAndStore, 'piglet/load_and_store'
-  autoload :Load,         'piglet/load'
-  autoload :Relation,     'piglet/relation'
-  autoload :Sample,       'piglet/sample'
-  autoload :Store,        'piglet/store'
-  autoload :Storing,      'piglet/storing'
-  autoload :Union,        'piglet/union'
+  autoload_files = %w(
+    assignment
+    cross
+    describe
+    distinct
+    dump
+    explain
+    field
+    field_expression
+    field_expression_functions
+    field_rename
+    foreach
+    group
+    illustrate
+    interpreter
+    limit
+    load_and_store
+    load
+    relation
+    sample
+    store
+    storing
+    union
+  )
+  
+  autoload_files.each do |f|
+    c = f.split('_').map { |s| s.capitalize }.join.to_sym
+    p = "piglet/#{f}"
+    autoload c, p
+  end
 
   class NotSupportedError < StandardError; end
 end
