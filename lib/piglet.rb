@@ -1,6 +1,7 @@
 module Piglet
   autoload_files = %w(
     assignment
+    cogroup
     cross
     describe
     distinct
@@ -16,14 +17,17 @@ module Piglet
     group
     illustrate
     interpreter
+    join
     limit
-    load_and_store
     load
+    load_and_store
+    order
     relation
     sample
     split
     store
     storing
+    stream
     union
   )
   

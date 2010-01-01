@@ -283,6 +283,23 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/SPLIT \w+ INTO \w+ IF a >= 0, \w+ IF a < 0/)
       end
     end
+    
+    describe 'ORDER' do
+      it 'outputs an ORDER statement' do
+        @interpreter.interpret { dump(load('in').order(:a)) }
+        @interpreter.to_pig_latin.should match(/ORDER \w+ BY a/)
+      end
+      
+      it 'outputs an ORDER statement with multiple fields' do
+        @interpreter.interpret { dump(load('in').order(:a, :b)) }
+        @interpreter.to_pig_latin.should match(/ORDER \w+ BY a, b/)
+      end
+      
+      it 'outputs an ORDER statement with ASC and DESC' do
+        @interpreter.interpret { dump(load('in').order([:a, :asc], [:b, :desc])) }
+        @interpreter.to_pig_latin.should match(/ORDER \w+ BY a ASC, b DESC/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do

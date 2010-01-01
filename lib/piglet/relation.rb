@@ -93,7 +93,11 @@ module Piglet
     #
     # NOTE: the syntax x.order(:a => :asc, :b => :desc) would be nice, but in
     # Ruby 1.8 the order of the keys cannot be guaranteed.
-    def order(*args); raise NotSupportedError; end
+    def order(*args)
+      fields, options = split_at_options(args)
+      fields = *fields
+      Order.new(self, fields, options)
+    end
   
     # SAMPLE
     #
