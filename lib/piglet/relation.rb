@@ -49,7 +49,7 @@ module Piglet
     #
     #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
     #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
-    def filter()
+    def filter
       Filter.new(self, yield(self))
     end
   
@@ -63,7 +63,7 @@ module Piglet
     #--
     #
     # TODO: FOREACH a { b GENERATE c }
-    def foreach(*args)
+    def foreach
       Foreach.new(self, yield(self))
     end
   
@@ -104,12 +104,10 @@ module Piglet
     
     # SPLIT
     #
-    #   y, z = x.split(:a.eql(3), :a.gt(4)) # => SPLIT x INTO y IF a == 3, z IF a > 4
-    #
-    #--
-    #
-    # TODO: this one is tricky since it's both assignment and transformation
-    def split(*args); raise NotSupportedError; end
+    #   y, z = x.split { |r| [r.a <= 3, r.b > 4]} # => SPLIT x INTO y IF a <= 3, z IF a > 4
+    def split
+      Split.new(self, yield(self)).shards
+    end
   
     # STREAM
     #

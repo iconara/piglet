@@ -21,6 +21,7 @@ module Piglet
     load
     relation
     sample
+    split
     store
     storing
     union

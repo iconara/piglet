@@ -228,6 +228,7 @@ The following Pig operators are supported:
 * +LOAD+
 * +ORDER+
 * +SAMPLE+
+* +SPLIT+
 * +STORE+
 * +UNION+
  
@@ -236,7 +237,6 @@ The following are currently not supported (but will be soon):
 * +COGROUP+
 * +JOIN+
 * +ORDER+
-* +SPLIT+
 * +STREAM+
 * +DEFINE+
 * +DECLARE+
