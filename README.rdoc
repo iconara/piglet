@@ -11,16 +11,259 @@ The code above will be translated to the following Pig Latin:
   relation_2 = LOAD 'input';
   relation_1 = GROUP relation_2 BY c;
   STORE relation_1 INTO 'output';
+
+Piglet aims to look like Pig Latin while allowing for things like loops and control of flow that are missing from Pig. I started working on Piglet out of frustration that my Pig scripts started to be very repetitive. Pig lacks control of flow and mechanisms to apply the same set of operations on multiple relations. Piglet is my way of adding those features.
+
+== Usage
+
+It can be used either as a command line tool for translating a file of Piglet code into Pig Latin, or you can use it inline in a Ruby script:
+
+=== Command line usage
+
+If <code>piggy.rb</code> contains
+
+  store(load('input')), 'output')
+
+then running
+
+  piglet piggy.rb
+  
+will output
+  
+  relation_1 = LOAD 'input';
+  STORE relation_1 INTO 'output';
+  
+=== Programmatic interface
+
+  require 'piglet'
+  
+  @piglet = Piglet::Interpreter.new
+  @piglet.interpret do
+    store(load('input'), 'output')
+  end
+  puts @piglet.to_pig_latin
+  
+or
+
+  Piglet::Interpreter.new { store(load('input'), 'output') }.to_pig_latin
+  
+will print 
+
+  relation_1 = LOAD 'input';
+  STORE relation_1 INTO 'output';
+  
+to standard out.
+  
+== Examples of what it can do
+
+  a = load 'input', :schema => [:a, :b, :c]
+  b = a.group :c
+  c = b.foreach { |r| [r[0], r[1].a.max, r[1].b.max] }
+  store c, 'output'
+
+will result in the following Pig Latin:
+
+  relation_3 = LOAD 'input' AS (a, b, c);
+  relation_2 = GROUP relation_3 BY c;
+  relation_1 = FOREACH relation_2 GENERATE $0, MAX($1.a), MAX($1.b);
+  STORE relation_1 INTO 'output';
+
+== Syntax
+
+There are two kinds of operators in Piglet: load & store operators, and relation operators. Load & store are called as functions with no receiver, like this:
+
+  load('input')
+  store(a, 'out')
+  describe(b)
+  illustrate(c)
+  dump(d)
+  explain(e)
+  
+and those are also all the load & store operators. They mirror the Pig Latin operators +LOAD+, +STORE+, +DESCRIBE+, +ILLUSTRATE+, +DUMP+ and +EXPLAIN+.
+
+Relation operators are called as methods on relations. Relations are created by the +load+ operator, and can be stored in regular variables:
+
+  a = load('input', :schema => [:x, :y, :z])
+  b = a.group(:x)
+  store(b, 'out')
+  
+Unlinke Pig Latin, operators can be chained:
+
+  a = load('input', :schema => [:x, :y, :z])
+  b = a.sample(3).group(:x)
+  store(b, 'out')
+  
+In fact, a whole script can be written without using variables at all:
+
+  store(load('input', :schema => [:x, :y, :z]).sample(3).group(:x))
+  
+The relation operators are meant to be close to the Pig Latin syntax, but there are obvious limitations and tradeoffs, see the documentation for the Piglet::Relation mixin for syntax examples.
+
+=== <code>load</code>
+
+When loading a relation you can specify the schema by passing the <code>:schema</code> option to +load+. The syntax of the schema specification is not perfect at this time: if you don't care about types you can pass an array of symbols or strings, like this:
+
+  load('input', :schema => %w(a b c d))
+  load('input', :schema => [:a, :b, :c, :d])
+  
+But if you want types, then you need to pass an array of arrays, where the inner arrays contain the field name and the field type:
+
+  load('input', :schema => [[:a, :chararray], [:b, :long]])
+  
+This is a bit inconvenient. I would like to use a hash, like this: <code>{:a => :chararray, :b => :long}</code>, but since the order of the keys isn't guaranteed in Ruby 1.8, it's not possible. I'm working on something better.
+
+You can also specify a load function by passing the <code>:using</code> option:
+
+  load('input', :using => :pig_storage)
+  load('input', :using => 'MyOwnFunction')
+  
+Piglet knows to translate <code>:pig_storage</code> to <code>PigStorage</code>, as well as the other pre-defined load and store functions: <code>:binary_serializer</code>, <code>:binary_deserializer</code>, <code>:bin_storage</code>, <code>:pig_dump</code> and <code>:text_loader</code>.
+
+== <code>store</code>, <code>dump</code>, <code>describe</code>, etc.
+
++store+ works similarily to +load+, but it takes a relation as its first argument, and the path to the output as second. It too takes the option <code>:using</code>, with the same values as +load+.
+
++dump+, +describe+, +illustrate+ and +explain+ all take a relation as sole argument. +explain+ can be called without argument (see the Pig Latin manual for what +EXPLAIN+ without argument does).
+
+=== Putting it all together
+
+Let's look at a more complex example:
+
+  students = load('students.txt', :schema => [%w(student chararray), %w(age int), %w(grade int)])
+  top_acheivers = students.filter { |r| r.grade == 5 }
+  name_and_age = top_acheivers.foreach { |r| [r.student.as(:name), r.age] }
+  name_by_age = name_and_age.group(:age)
+  count_by_age = name_by_age.foreach { |r| [r[0].as(:age), r[1].name.count.as(:count)]}
+  store(count_by_age, 'student_counts_by_age.txt', :using => :pig_storage)
+
+We load the file <code>students.txt</code> as a relation with three fields: <code>student</code>, a string, <code>age</code> an integer and <code>grade</code> another integer. Next we filter out the top acheivers with +filter+. +filter+ takes a block and that block gets a referece to the relation (the one +filter+ was called on), the result of the block will be the filter expression, in this case it's <code>grade == 5</p>.
+
+When we have the top acheivers we want to make a projection to remove the grades field, since we will not use it in the next set of calculations. In Pig Latin this is done with <code>FOREACH … GENERATE</code>, which is just +foreach+ in Piglet. Like +filter+, +foreach+ takes a block that gets a reference to the relation. The result of the block should be an array of expressions, and in this case it's <code>[r.student.as(:name), r.age]</code>, which means the student field from the relation, renamed to "name" and the age field. The resulting relation will have two fields: "name" and "age".
+
+On the next line we group the relation by the age field, and following that we do another projection, this time on the grouped relation. Remember that when doing a grouping in Pig you get a relation that in this case looks like this: <code>(group:int, name_by_age:{name:chararray, age:int})</code>. In the block passed to +foreach+ we use <code>r[0]</code> and <code>r[1]</code> to reference the first and second fields of <code>name_by_age</code>, equivalent to <code>$0</code> and <code>$1</code> in Pig Latin. In Pig Latin you could also have used the names <code>group</code> and <code>name_by_age</code>, but for a number of reasons you can't do that in Piglet (<code>r.group</code> unfortunately refers to the <code>group</code> method, and the relation isn't actually called <code>name_by_age</code> after Piglet has translated the code into Pig Latin).
+
+The expression <code>r[1].name.count.as(:count)</code> means take the "name" field from the relation in the second field of the relation (<code>$1.name</code>), run the <code>COUNT</code> operator on it, and rename it <code>count</code>, i.e. <code>COUNT($1.name) AS count</code>.
+
+Finally we store the result in a file called <code>student_counts_by_age.txt</code>, using PigStorage (which isn't strictly necessary to specify since it's the default. If you have a custom method you can pass its name as a string instead of <code>:pig_storage</code>).
+
+Piglet will translate this into the following Pig Latin:
+
+  relation_5 = LOAD 'students.txt' AS (student:chararray, age:int, grade:int);
+  relation_4 = FILTER relation_5 BY grade == 5;
+  relation_3 = FOREACH relation_4 GENERATE student AS name, age;
+  relation_2 = GROUP relation_3 BY age;
+  relation_1 = FOREACH relation_2 GENERATE $0 AS age, COUNT($1.name) AS count;
+  STORE relation_1 INTO 'student_counts_by_age.txt' USING PigStorage;
+
+=== Going beyond Pig Latin
+
+My goal with Piglet was to add control of flow and reuse mechanisms to Pig, so I'd better show some of the things you can do:
+
+  input = load('input', :schema => %w(country browser site visit_duration))
+  %w(country browser site).each do |dimension|
+    grouped = input.group(dimension).foreach do |r|
+      [r[0], r[1].visit_duration.sum]
+    end
+    store(grouped, "output-#{dimension}")
+  end
+
+We load a file that contains an ID field, three dimensions (country, browser and site) and a metric: the duration of a visit. This could be data from a the logs of a set of websites, or an ad server. What we want to do is to sum the the <code>visit_duration</code> field for each of the three dimensions. This would be a big tedious in Pig Latin:
+
+  input = LOAD 'input' AS (country browser site visit_duration);
+  by_country = GROUP input BY country;
+  by_browser = GROUP input BY browser;
+  by_site = GROUP input BY site;
+  sum_by_country = FOREACH by_country GENERATE $0, SUM($1.visit_duration);
+  sum_by_browser = FOREACH by_browser GENERATE $0, SUM($1.visit_duration);
+  sum_by_site = FOREACH by_site GENERATE $0, SUM($1.visit_duration);
+  STORE sum_by_country INTO 'output-country;
+  STORE sum_by_browser INTO 'output-browser;
+  STORE sum_by_site INTO 'output-site;
+  
+But in Piglet it's as simple as looping over the names of the dimensions. You could even define a method that encapsulates the grouping, summing and storing (although in this case it would be a bit overkill):
+
+  def sum_dimension(relation, dimension)
+    grouped = relation.group(dimension).foreach do |r|
+      [r[0], r[1].visit_duration.sum]
+    end
+    store(grouped, "output-#{dimension}")
+  end
+
+  input = load('input', :schema => %w(country browser site visit_duration))
+  %w(country browser site).each do |dimension|
+    sum_dimension(input, dimension)
+  end
+
+You can even define your own relation operations if you want, just add them to Piglet::Relation:
+
+  module Piglet::Relation
+    # Returns a list of sampled relations for each given sample size
+    def samples(*sizes)
+      sizes.map { |s| sample(s) }
+    end
+  end
+  
+and then use them just as any other operator:
+
+  small, medium, large = input.samples(0.01, 0.1, 0.5)
+  
+nifty, huh?
+
+== Limitations
   
 The aim is to support most of Pig Latin, but currently there are some limitations.
 
-== Oddities and implementation details
+The following Pig operators are supported:
+
+* +CROSS+
+* +DESCRIBE+
+* +DISTINCT+
+* +DUMP+
+* +EXPLAIN+
+* +FILTER+
+* <code>FOREACH … GENERATE</code>
+* +GROUP+
+* +ILLUSTRATE+
+* +LIMIT+
+* +LOAD+
+* +ORDER+
+* +SAMPLE+
+* +STORE+
+* +UNION+
+ 
+The following are currently not supported (but will be soon):
+
+* +COGROUP+
+* +JOIN+
+* +ORDER+
+* +SPLIT+
+* +STREAM+
+* +DEFINE+
+* +DECLARE+
+* +REGISTER+
+
+The file commands (+cd+, +cat+, etc.) will probably not be supported for the forseeable future.
+
+All the aggregate functions are supported:
+
+* +AVG+
+* +CONCAT+
+* +COUNT+
+* +DIFF+
+* +IsEmpty+
+* +MAX+
+* +MIN+
+* +SIZE+
+* +SUM+
+* +TOKENIZE+
+  
+Piglet only supports a limited set of arithmetic, comparison and boolean operators, so in practice the support for +FILTER+ and <code>FOREACH … GENERATE</code> is limited. This will be remedied soon, although the <code>!=</code> operator may never be supported in Ruby 1.8, since the <code>!</code> operator cannot be overridden (so there will be some less good looking solution like <code>.not</code>).
 
 === Why aren't the aliases in the Pig Latin the same as the variable names in the Piglet script?
 
 When you run +piglet+ on a Piglet script the aliases in the output will be <tt>relation_1</tt>, <tt>relation_2</tt>, <tt>relation_3</tt>, and so on, instead of the names of the variables of the Piglet script -- like in the example at the top of this document.
   
-The names +a+ and +b+ are lost in translation, this is unfortunate but hard to avoid. Firstly there is no way to discover the names of variables, and secondly there is no correspondence between a statement in a Piglet script and a statement in Pig Latin, +a.union(b, c).sample(3).group(:x)+ is at least three statements in Pig Latin. It simply wouldn't be worth the extra complexity of trying to infer some variable names and reuse them as aliases in the Pig Latin output.
+The names +a+ and +b+ are lost in translation, this is unfortunate but hard to avoid. Firstly there is no way to discover the names of variables, and secondly there is no correspondence between a statement in a Piglet script and a statement in Pig Latin, <code>a.union(b, c).sample(3).group(:x)</code> is at least three statements in Pig Latin. It simply wouldn't be worth the extra complexity of trying to infer some variable names and reuse them as aliases in the Pig Latin output.
 
 In the future I may add a way of manually suggesting relation aliases, so that the Pig Latin output is more readable.
 
