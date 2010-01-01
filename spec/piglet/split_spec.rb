@@ -15,12 +15,13 @@ describe Piglet::Split do
 
   describe '#to_s' do
     it 'outputs all x IF y expressions' do
-      @split.to_s.should match(/SPLIT rel INTO \w+ IF y, \w+ IF w/)
+      @split.to_s.should match(/SPLIT rel INTO \w+ IF [yw], \w+ IF [yw]/)
     end
     
     it 'contains the names of all the shard relations' do
       @shards = @split.shards
-      @split.to_s.should eql("SPLIT rel INTO #{@shards[0].alias} IF w, #{@shards[1].alias} IF y")
+      @split.to_s.should include("#{@shards[0].alias} IF y")
+      @split.to_s.should include("#{@shards[1].alias} IF w")
     end
   end
   
