@@ -1,5 +1,5 @@
 module Piglet
-  class FieldRename
+  class FieldRename # :nodoc:
     def initialize(new_name, field_expression)
       @new_name, @field_expression = new_name, field_expression
     end

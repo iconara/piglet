@@ -1,5 +1,5 @@
 module Piglet
-  module FieldExpressionFunctions
+  module FieldExpressionFunctions # :nodoc:
     def avg
       FieldExpression.new('AVG', self)
     end

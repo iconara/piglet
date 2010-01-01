@@ -1,5 +1,5 @@
 module Piglet
-  class Field
+  class Field # :nodoc:
     include FieldExpressionFunctions
     
     def initialize(name, relation=nil, options=nil)

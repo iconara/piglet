@@ -2,6 +2,8 @@ module Piglet
   module Relation
     attr_reader :sources
 
+    # The name this relation will get in Pig Latin. Then name is generated when
+    # the relation is outputed by the interpreter, and will be unique.
     def alias
       @alias ||= Relation.next_alias
     end

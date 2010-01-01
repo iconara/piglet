@@ -1,5 +1,5 @@
 module Piglet
-  class Filter
+  class Filter # :nodoc:
     include Relation
     
     def initialize(relation, expression)

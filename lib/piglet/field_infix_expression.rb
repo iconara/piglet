@@ -1,5 +1,5 @@
 module Piglet
-  class FieldInfixExpression
+  class FieldInfixExpression # :nodoc:
     include FieldExpressionFunctions
     
     def initialize(operator, left_expression, right_expression)

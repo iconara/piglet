@@ -136,7 +136,7 @@ Let's look at a more complex example:
   count_by_age = name_by_age.foreach { |r| [r[0].as(:age), r[1].name.count.as(:count)]}
   store(count_by_age, 'student_counts_by_age.txt', :using => :pig_storage)
 
-We load the file <code>students.txt</code> as a relation with three fields: <code>student</code>, a string, <code>age</code> an integer and <code>grade</code> another integer. Next we filter out the top acheivers with +filter+. +filter+ takes a block and that block gets a referece to the relation (the one +filter+ was called on), the result of the block will be the filter expression, in this case it's <code>grade == 5</p>.
+We load the file <code>students.txt</code> as a relation with three fields: <code>student</code>, a string, <code>age</code> an integer and <code>grade</code> another integer. Next we filter out the top acheivers with +filter+. +filter+ takes a block and that block gets a referece to the relation (the one +filter+ was called on), the result of the block will be the filter expression, in this case it's <code>grade == 5</code>.
 
 When we have the top acheivers we want to make a projection to remove the grades field, since we will not use it in the next set of calculations. In Pig Latin this is done with <code>FOREACH … GENERATE</code>, which is just +foreach+ in Piglet. Like +filter+, +foreach+ takes a block that gets a reference to the relation. The result of the block should be an array of expressions, and in this case it's <code>[r.student.as(:name), r.age]</code>, which means the student field from the relation, renamed to "name" and the age field. The resulting relation will have two fields: "name" and "age".
 
