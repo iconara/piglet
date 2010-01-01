@@ -258,6 +258,18 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b AS c, a.b AS d/)
       end
     end
+
+    describe 'FILTER' do
+      # it 'outputs a FILTER statement' do
+      #   @interpreter.interpret { dump(load('in').filter { |r| r.a == 3 }) }
+      #   @interpreter.to_pig_latin.should match(/FILTER \w+ BY a == 3/)
+      # end
+      # 
+      # it 'outputs a FILTER statement with a complex test' do
+      #   @interpreter.interpret { dump(load('in').filter { |r| r.a > r.b && r.c != 3 }) }
+      #   @interpreter.to_pig_latin.should match(/FILTER \w+ BY a > b AND c != 3/)
+      # end
+    end
   end
 
   context 'aliasing & multiple statements' do

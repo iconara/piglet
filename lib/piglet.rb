@@ -9,7 +9,9 @@ module Piglet
     field
     field_expression
     field_expression_functions
+    field_infix_expression
     field_rename
+    filter
     foreach
     group
     illustrate

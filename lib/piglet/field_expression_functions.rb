@@ -39,5 +39,29 @@ module Piglet
     def as(new_name)
       FieldRename.new(new_name, self)
     end
+    
+    def ==(other)
+      FieldInfixExpression.new('==', self, other)
+    end
+    
+    def >(other)
+      FieldInfixExpression.new('>', self, other)
+    end
+    
+    def <(other)
+      FieldInfixExpression.new('<', self, other)
+    end
+    
+    def >=(other)
+      FieldInfixExpression.new('>=', self, other)
+    end
+    
+    def <=(other)
+      FieldInfixExpression.new('<=', self, other)
+    end
+    
+    def %(other)
+      FieldInfixExpression.new('%', self, other)
+    end
   end
 end

@@ -52,4 +52,39 @@ describe Piglet::Field do
     end
   end
   
+  context 'infix operators' do
+    before do
+      @field1 = Piglet::Field.new('field1')
+      @field2 = Piglet::Field.new('field2')
+    end
+    
+    it 'handles ==' do
+      (@field1 == @field2).to_s.should eql('field1 == field2')
+    end
+    
+    # it 'handles !=' do
+    #   (@field1 != @field2).to_s.should eql('field1 != field2')
+    # end
+    
+    it 'handles >' do
+      (@field1 > @field2).to_s.should eql('field1 > field2')
+    end
+    
+    it 'handles <' do
+      (@field1 < @field2).to_s.should eql('field1 < field2')
+    end
+    
+    it 'handles >=' do
+      (@field1 >= @field2).to_s.should eql('field1 >= field2')
+    end
+    
+    it 'handles <=' do
+      (@field1 <= @field2).to_s.should eql('field1 <= field2')
+    end
+    
+    it 'handles %' do
+      (@field1 % @field2).to_s.should eql('field1 % field2')
+    end
+  end
+  
 end

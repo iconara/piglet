@@ -45,9 +45,11 @@ module Piglet
   
     # FILTER
     #
-    #   x.filter(:a.eql(:b))                   # => FILTER x BY a == b
-    #   x.filter(:a.gt(:b).and(:c.not_eql(3))) # => FILTER x BY a > b AND c != 3
-    def filter(expression); raise NotSupportedError; end
+    #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
+    #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
+    def filter()
+      Filter.new(self, yield(self))
+    end
   
     # FOREACH ... GENERATE
     #
@@ -60,12 +62,7 @@ module Piglet
     #
     # TODO: FOREACH a { b GENERATE c }
     def foreach(*args)
-      if block_given?
-        field_expressions = yield self
-      else
-        field_expressions = args
-      end
-      Foreach.new(self, field_expressions)
+      Foreach.new(self, yield(self))
     end
   
     # JOIN
