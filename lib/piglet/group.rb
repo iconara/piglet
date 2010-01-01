@@ -18,4 +18,16 @@ module Piglet
       str
     end
   end
+  
+  module Relation
+    # GROUP
+    #
+    #   x.group(:a)                           # => GROUP x By a
+    #   x.group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
+    #   x.group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
+    def group(*args)
+      grouping, options = split_at_options(args)
+      Group.new(self, [grouping].flatten, options)
+    end
+  end
 end

@@ -13,4 +13,14 @@ module Piglet
       str
     end
   end
+  
+  module Relation
+    # DISTINCT
+    #
+    #   x.distinct                 # => DISTINCT x
+    #   x.distinct(:parallel => 5) # => DISTINCT x PARALLEL 5
+    def distinct(options={})
+      Distinct.new(self, options)
+    end
+  end
 end
