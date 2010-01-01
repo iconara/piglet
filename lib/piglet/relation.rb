@@ -69,11 +69,13 @@ module Piglet
   
     # JOIN
     #
-    #   x.join(y, x => :a, y => :b)                        # => JOIN x BY a, y BY b
-    #   x.join([y, z], x => :a, y => :b, z => :c)          # => JOIN x BY a, y BY b, z BY c
-    #   x.join(y, x => :a, y => :b, :using => :replicated) # => JOIN x BY a, y BY b USING "replicated"
-    #   x.join(y, x => :a, y => :b, :parallel => 5)        # => JOIN x BY a, y BY b PARALLEL 5
-    def join(*args); raise NotSupportedError; end
+    #   x.join(x => :a, y => :b)                        # => JOIN x BY a, y BY b
+    #   x.join(x => :a, y => :b, z => :c)               # => JOIN x BY a, y BY b, z BY c
+    #   x.join(x => :a, y => :b, :using => :replicated) # => JOIN x BY a, y BY b USING "replicated"
+    #   x.join(x => :a, y => :b, :parallel => 5)        # => JOIN x BY a, y BY b PARALLEL 5
+    def join(description)
+      Join.new(self, description)
+    end
   
     # LIMIT
     #

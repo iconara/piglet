@@ -300,6 +300,38 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/ORDER \w+ BY a ASC, b DESC/)
       end
     end
+    
+    describe 'JOIN' do
+      it 'outputs a JOIN statement' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.join(a => :x, b => :y)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/JOIN \w+ BY \w+, \w+ BY \w+/)
+      end
+
+      it 'outputs a JOIN statement with a PARALLEL clause' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.join(a => :x, b => :y, :parallel => 5)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/JOIN \w+ BY \w+, \w+ BY \w+ PARALLEL 5/)
+      end
+
+      it 'outputs a JOIN statement with a USING clause' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.join(a => :x, b => :y, :using => :replicated)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/JOIN \w+ BY \w+, \w+ BY \w+ USING "replicated"/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do
