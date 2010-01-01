@@ -40,9 +40,11 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should include("LOAD 'some/path' USING XYZ;")
       end
   
-      it 'knows that the load method :pig_storage means PigStorage' do
-        @interpreter.interpret { store(load('some/path', :using => :pig_storage), 'out') }
-        @interpreter.to_pig_latin.should include("LOAD 'some/path' USING PigStorage;")
+      Piglet::LoadAndStore::LOAD_STORE_FUNCTIONS.each do |symbolic_name, function|
+        it "knows that the load method :#{symbolic_name} means #{function}" do
+          @interpreter.interpret { store(load('some/path', :using => symbolic_name), 'out') }
+          @interpreter.to_pig_latin.should include("LOAD 'some/path' USING #{function};")
+        end
       end
   
       it 'outputs a LOAD statement with an AS clause' do
