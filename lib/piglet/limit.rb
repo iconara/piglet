@@ -10,13 +10,4 @@ module Piglet
       "LIMIT #{@sources.first.alias} #{@n}"
     end
   end
-  
-  module Relation
-    # LIMIT
-    #
-    #   x.limit(10) # => LIMIT x 10
-    def limit(n)
-      Limit.new(self, n)
-    end
-  end
 end

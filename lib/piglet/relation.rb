@@ -7,7 +7,25 @@ module Piglet
     def alias
       @alias ||= Relation.next_alias
     end
-    
+  
+    # GROUP
+    #
+    #   x.group(:a)                           # => GROUP x By a
+    #   x.group(:a, :b, :c)                   # => GROUP x BY (a, b, c)
+    #   x.group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
+    def group(*args)
+      grouping, options = split_at_options(args)
+      Group.new(self, [grouping].flatten, options)
+    end
+  
+    # DISTINCT
+    #
+    #   x.distinct                 # => DISTINCT x
+    #   x.distinct(:parallel => 5) # => DISTINCT x PARALLEL 5
+    def distinct(options={})
+      Distinct.new(self, options)
+    end
+
     # COGROUP
     #
     #   x.cogroup(y, x => :a, y => :b)                 # => COGROUP x BY a, y BY b
@@ -17,6 +35,38 @@ module Piglet
     #   x.cogroup(y, x => :a, y => :b, :parallel => 5) # => COGROUP x BY a, y BY b PARALLEL 5
     def cogroup(*args); raise NotSupportedError; end
   
+    # CROSS
+    #
+    #   x.cross(y)                      # => CROSS x, y
+    #   x.cross(y, z, w)                # => CROSS x, y, z, w
+    #   x.cross([y, z], :parallel => 5) # => CROSS x, y, z, w PARALLEL 5
+    def cross(*args)
+      relations, options = split_at_options(args)
+      Cross.new(([self] + relations).flatten, options)
+    end
+  
+    # FILTER
+    #
+    #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
+    #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
+    def filter
+      Filter.new(self, yield(self))
+    end
+  
+    # FOREACH ... GENERATE
+    #
+    #   x.foreach { |r| r.a }            # => FOREACH x GENERATE a
+    #   x.foreach { |r| [r.a, r.b] }     # => FOREACH x GENERATE a, b
+    #   x.foreach { |r| r.a.max }        # => FOREACH x GENERATE MAX(a)
+    #   x.foreach { |r| r.a.avg.as(:b) } # => FOREACH x GENERATE AVG(a) AS b
+    #
+    #--
+    #
+    # TODO: FOREACH a { b GENERATE c }
+    def foreach
+      Foreach.new(self, yield(self))
+    end
+  
     # JOIN
     #
     #   x.join(y, x => :a, y => :b)                        # => JOIN x BY a, y BY b
@@ -24,6 +74,13 @@ module Piglet
     #   x.join(y, x => :a, y => :b, :using => :replicated) # => JOIN x BY a, y BY b USING "replicated"
     #   x.join(y, x => :a, y => :b, :parallel => 5)        # => JOIN x BY a, y BY b PARALLEL 5
     def join(*args); raise NotSupportedError; end
+  
+    # LIMIT
+    #
+    #   x.limit(10) # => LIMIT x 10
+    def limit(n)
+      Limit.new(self, n)
+    end
   
     # ORDER
     #
@@ -38,6 +95,20 @@ module Piglet
     # Ruby 1.8 the order of the keys cannot be guaranteed.
     def order(*args); raise NotSupportedError; end
   
+    # SAMPLE
+    #
+    #   x.sample(5) # => SAMPLE x 5;
+    def sample(n)
+      Sample.new(self, n)
+    end
+    
+    # SPLIT
+    #
+    #   y, z = x.split { |r| [r.a <= 3, r.b > 4]} # => SPLIT x INTO y IF a <= 3, z IF a > 4
+    def split
+      Split.new(self, yield(self)).shards
+    end
+  
     # STREAM
     #
     #   x.stream(x, 'cut -f 3')                         # => STREAM x THROUGH `cut -f 3`
@@ -49,6 +120,14 @@ module Piglet
     # TODO: how to handle DEFINE'd commands?
     def stream(relations, command, options={})
       raise NotSupportedError
+    end
+  
+    # UNION
+    #
+    #   x.union(y)    # => UNION x, y
+    #   x.union(y, z) # => UNION x, y, z
+    def union(*relations)
+      Union.new(*([self] + relations))
     end
 
     def method_missing(name, *args)

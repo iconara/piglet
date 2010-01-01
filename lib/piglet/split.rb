@@ -38,13 +38,4 @@ module Piglet
       self.alias
     end
   end
-  
-  module Relation
-    # SPLIT
-    #
-    #   y, z = x.split { |r| [r.a <= 3, r.b > 4]} # => SPLIT x INTO y IF a <= 3, z IF a > 4
-    def split
-      Split.new(self, yield(self)).shards
-    end
-  end
 end

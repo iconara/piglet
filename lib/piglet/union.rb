@@ -16,14 +16,4 @@ module Piglet
       @sources.map { |s| s.alias }
     end
   end
-  
-  module Relation
-    # UNION
-    #
-    #   x.union(y)    # => UNION x, y
-    #   x.union(y, z) # => UNION x, y, z
-    def union(*relations)
-      Union.new(*([self] + relations))
-    end
-  end
 end

@@ -10,14 +10,4 @@ module Piglet
       "FILTER #{@sources.first.alias} BY #{@expression}"
     end
   end
-  
-  module Relation
-    # FILTER
-    #
-    #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
-    #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
-    def filter
-      Filter.new(self, yield(self))
-    end
-  end
 end
