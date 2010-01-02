@@ -155,7 +155,7 @@ module Piglet
     end
   
     def eql?(other)
-      other.is_a(Relation) && other.alias == self.alias
+      other.is_a?(Relation) && other.alias == self.alias
     end
   
   private

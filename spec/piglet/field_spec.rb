@@ -58,32 +58,10 @@ describe Piglet::Field do
       @field2 = Piglet::Field.new('field2')
     end
     
-    it 'handles ==' do
-      (@field1 == @field2).to_s.should eql('field1 == field2')
-    end
-    
-    # it 'handles !=' do
-    #   (@field1 != @field2).to_s.should eql('field1 != field2')
-    # end
-    
-    it 'handles >' do
-      (@field1 > @field2).to_s.should eql('field1 > field2')
-    end
-    
-    it 'handles <' do
-      (@field1 < @field2).to_s.should eql('field1 < field2')
-    end
-    
-    it 'handles >=' do
-      (@field1 >= @field2).to_s.should eql('field1 >= field2')
-    end
-    
-    it 'handles <=' do
-      (@field1 <= @field2).to_s.should eql('field1 <= field2')
-    end
-    
-    it 'handles %' do
-      (@field1 % @field2).to_s.should eql('field1 % field2')
+    [:==, :>, :<, :>=, :<=, :%].each do |op|
+      it "handles #{op}" do
+        @field1.send(op, @field2).to_s.should eql("field1 #{op} field2")
+      end
     end
   end
   
