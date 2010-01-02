@@ -215,6 +215,7 @@ The aim is to support most of Pig Latin, but currently there are some limitation
 
 The following Pig operators are supported:
 
+* +COGROUP+
 * +CROSS+
 * +DESCRIBE+
 * +DISTINCT+
@@ -224,6 +225,7 @@ The following Pig operators are supported:
 * <code>FOREACH … GENERATE</code>
 * +GROUP+
 * +ILLUSTRATE+
+* +JOIN+
 * +LIMIT+
 * +LOAD+
 * +ORDER+
@@ -234,9 +236,6 @@ The following Pig operators are supported:
  
 The following are currently not supported (but will be soon):
 
-* +COGROUP+
-* +JOIN+
-* +ORDER+
 * +STREAM+
 * +DEFINE+
 * +DECLARE+

@@ -332,6 +332,49 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/JOIN \w+ BY \w+, \w+ BY \w+ USING "replicated"/)
       end
     end
+    
+    describe 'COGROUP' do
+      it 'outputs a COGROUP statement' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.cogroup(a => :x, b => :y)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/COGROUP \w+ BY \w+, \w+ BY \w+/)
+      end
+      
+      it 'outputs a COGROUP statement with multiple join fields' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.cogroup(a => :x, b => [:y, :z, :w])
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/\w+ BY \(y, z, w\)/)
+      end
+
+      it 'outputs a COGROUP statement with a PARALLEL clause' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.cogroup(a => :x, b => :y, :parallel => 5)
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/COGROUP \w+ BY \w+, \w+ BY \w+ PARALLEL 5/)
+      end
+      
+      it 'outputs a COGROUP statement with INNER and OUTER' do
+        @interpreter.interpret do
+          a = load('in1')
+          b = load('in2')
+          c = a.cogroup(a => [:x, :inner], b => [:y, :outer])
+          dump(c)
+        end
+        @interpreter.to_pig_latin.should match(/\w+ BY x INNER/)
+        @interpreter.to_pig_latin.should match(/\w+ BY y OUTER/)
+      end
+    end
   end
 
   context 'aliasing & multiple statements' do

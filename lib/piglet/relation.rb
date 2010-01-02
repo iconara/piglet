@@ -28,12 +28,14 @@ module Piglet
 
     # COGROUP
     #
-    #   x.cogroup(y, x => :a, y => :b)                 # => COGROUP x BY a, y BY b
-    #   x.cogroup([y, z], x => :a, y => :b, z => :c)   # => COGROUP x BY a, y BY b, z BY c
-    #   x.cogroup(y, x => [:a, :b], y => [:c, :d])     # => COGROUP x BY (a, b), y BY (c, d)
-    #   x.cogroup(y, x => :a, y => [:b, :inner])       # => COGROUP x BY a, y BY b INNER
-    #   x.cogroup(y, x => :a, y => :b, :parallel => 5) # => COGROUP x BY a, y BY b PARALLEL 5
-    def cogroup(*args); raise NotSupportedError; end
+    #   x.cogroup(x => :a, y => :b)                 # => COGROUP x BY a, y BY b
+    #   x.cogroup(x => :a, y => :b, z => :c)        # => COGROUP x BY a, y BY b, z BY c
+    #   x.cogroup(x => [:a, :b], y => [:c, :d])     # => COGROUP x BY (a, b), y BY (c, d)
+    #   x.cogroup(x => :a, y => [:b, :inner])       # => COGROUP x BY a, y BY b INNER
+    #   x.cogroup(x => :a, y => :b, :parallel => 5) # => COGROUP x BY a, y BY b PARALLEL 5
+    def cogroup(description)
+      Cogroup.new(self, description)
+    end
   
     # CROSS
     #
