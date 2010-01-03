@@ -5,7 +5,7 @@ require 'lib/piglet'
 begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
-    gem.name = "Piglet"
+    gem.name = "piglet"
     gem.summary = %Q{Piglet is a DSL for Pig scripts}
     gem.description = %Q{Piglet aims to look like Pig Latin while allowing for things like loops and control of flow that are missing from Pig.}
     gem.email = "theo@iconara.net"
