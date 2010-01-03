@@ -6,8 +6,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "Piglet"
-    gem.summary = %Q{TODO: Piglet is a DSL for Pig scripts}
-    gem.description = %Q{TODO: Piglet is a DSL for Pig scripts}
+    gem.summary = %Q{Piglet is a DSL for Pig scripts}
+    gem.description = %Q{Piglet aims to look like Pig Latin while allowing for things like loops and control of flow that are missing from Pig.}
     gem.email = "theo@iconara.net"
     gem.homepage = "http://github.com/iconara/piglet"
     gem.authors = ["Theo Hultberg"]
