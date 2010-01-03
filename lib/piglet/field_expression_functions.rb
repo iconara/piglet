@@ -1,67 +1,62 @@
 module Piglet
   module FieldExpressionFunctions # :nodoc:
-    def avg
-      FieldExpression.new('AVG', self)
-    end
-  
-    def count
-      FieldExpression.new('COUNT', self)
-    end
-
-    def diff
-      FieldExpression.new('DIFF', self)
+    SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
+    FUNCTIONS = [:avg, :count, :diff, :max, :min, :size, :sum, :tokenize]
+    
+    FUNCTIONS.each do |fun|
+      define_method(fun) { FieldFunctionExpression.new(fun.to_s.upcase, self) }
     end
 
-    def is_empty?
-      FieldExpression.new('IsEmpty', self)
-    end
-
-    def max
-      FieldExpression.new('MAX', self)
-    end
-
-    def min
-      FieldExpression.new('MIN', self)
-    end
-
-    def size
-      FieldExpression.new('SIZE', self)
-    end
-
-    def sum
-      FieldExpression.new('SUM', self)
-    end
-
-    def tokenize
-      FieldExpression.new('TOKENIZE', self)
+    def empty?
+      FieldFunctionExpression.new('IsEmpty', self)
     end
     
     def as(new_name)
       FieldRename.new(new_name, self)
     end
     
-    def ==(other)
-      FieldInfixExpression.new('==', self, other)
+    def not
+      FieldPrefixExpression.new('NOT', self)
     end
     
-    def >(other)
-      FieldInfixExpression.new('>', self, other)
+    def null?
+      FieldSuffixExpression.new('is null', self)
     end
     
-    def <(other)
-      FieldInfixExpression.new('<', self, other)
+    def not_null?
+      FieldSuffixExpression.new('is not null', self)
     end
     
-    def >=(other)
-      FieldInfixExpression.new('>=', self, other)
+    def cast(type)
+      FieldPrefixExpression.new("(#{type.to_s})", self)
     end
     
-    def <=(other)
-      FieldInfixExpression.new('<=', self, other)
+    def matches(pattern)
+      regex_options_pattern = /^\(\?.+?:(.*)\)$/
+      pattern = pattern.to_s.sub(regex_options_pattern, '\1') if pattern.is_a?(Regexp) && pattern.to_s =~ regex_options_pattern
+      FieldInfixExpression.new('matches', self, "'#{pattern.to_s}'")
     end
     
-    def %(other)
-      FieldInfixExpression.new('%', self, other)
+    def neg
+      FieldPrefixExpression.new('-', self, false)
+    end
+    
+    def ne(other)
+      FieldInfixExpression.new('!=', self, other)
+    end
+    
+    SYMBOLIC_OPERATORS.each do |op|
+      define_method(op) { |other| FieldInfixExpression.new(op.to_s, self, other) }
+    end
+    
+  protected
+  
+    def parenthesise(expr)
+      if expr.respond_to?(:simple?) && ! expr.simple?
+        "(#{expr})"
+      else
+        expr.to_s
+      end
     end
   end
 end

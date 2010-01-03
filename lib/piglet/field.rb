@@ -8,6 +8,10 @@ module Piglet
       @explicit_ancestry = options[:explicit_ancestry] || false
     end
     
+    def simple?
+      true
+    end
+    
     def method_missing(name, *args)
       if name.to_s =~ /^\w+$/ && args.empty?
         Field.new(name, self, :explicit_ancestry => true)

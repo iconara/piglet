@@ -1,11 +1,15 @@
 module Piglet
-  class FieldExpression # :nodoc:
+  class FieldFunctionExpression # :nodoc:
     include FieldExpressionFunctions
     
     def initialize(name, inner_expression, options=nil)
       options ||= {}
       @name, @inner_expression = name, inner_expression
       @new_name = options[:as]
+    end
+    
+    def simple?
+      false
     end
     
     def to_s

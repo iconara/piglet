@@ -8,10 +8,12 @@ module Piglet
     dump
     explain
     field
-    field_expression
     field_expression_functions
+    field_function_expression
     field_infix_expression
+    field_prefix_expression
     field_rename
+    field_suffix_expression
     filter
     foreach
     group

@@ -258,6 +258,13 @@ All the aggregate functions are supported:
   
 Piglet only supports a limited set of arithmetic, comparison and boolean operators, so in practice the support for +FILTER+ and <code>FOREACH … GENERATE</code> is limited. This will be remedied soon, although the <code>!=</code> operator may never be supported in Ruby 1.8, since the <code>!</code> operator cannot be overridden (so there will be some less good looking solution like <code>.not</code>).
 
+Piglet does not support:
+
+* <code>!=</code> (not equals, you have to use <code>==</code> and a <code>NOT</code>, e.g. <code>(a == b).not</code>, which will be translated as <code>NOT (a == b)</code> or you can use <code>#ne</code>, which will translate to !=, e.g. <code>a.ne(b)</code> will become <code>a != b</code>)
+* <code>? :</code> (the ternary operator)
+* <code>-</code> (negation, but you can use <code>#neg</code> on a field expression to get the same result, e.g. <code>a.neg</code> will be translated as <code>-a</code>)
+* <code>key#value</code> (map dereferencing)
+
 === Why aren't the aliases in the Pig Latin the same as the variable names in the Piglet script?
 
 When you run +piglet+ on a Piglet script the aliases in the output will be <tt>relation_1</tt>, <tt>relation_2</tt>, <tt>relation_3</tt>, and so on, instead of the names of the variables of the Piglet script -- like in the example at the top of this document.
