@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'rake'
+require 'lib/piglet'
 
 begin
   require 'jeweler'
@@ -11,6 +12,7 @@ begin
     gem.homepage = "http://github.com/iconara/piglet"
     gem.authors = ["Theo Hultberg"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.version = Piglet::VERSION
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

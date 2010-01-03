@@ -1,4 +1,6 @@
 module Piglet
+  VERSION = '0.1.0'
+  
   autoload_files = %w(
     assignment
     cogroup
