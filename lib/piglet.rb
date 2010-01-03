@@ -1,4 +1,5 @@
-module Piglet
+# :main: README.rdoc
+module Piglet # :nodoc:
   VERSION = '0.1.0'
   
   autoload_files = %w(
