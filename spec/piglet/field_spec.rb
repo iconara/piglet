@@ -125,6 +125,22 @@ describe Piglet::Field do
     it 'supports casts on an expression' do
       (@field1 + @field2).cast(:chararray).to_s.should eql("(chararray) (field1 + field2)")
     end
+
+    it 'supports AND though #and on fields' do
+      @field1.and(@field2).to_s.should eql("field1 AND field2")
+    end
+    
+    it 'supports AND through #and on expressions' do
+      (@field1 + @field2).and(@field1 - @field2).to_s.should eql("(field1 + field2) AND (field1 - field2)")
+    end
+
+    it 'supports OR though #or on fields' do
+      @field1.or(@field2).to_s.should eql("field1 OR field2")
+    end
+    
+    it 'supports OR through #or on expressions' do
+      (@field1 + @field2).or(@field1 - @field2).to_s.should eql("(field1 + field2) OR (field1 - field2)")
+    end
   end
   
 end

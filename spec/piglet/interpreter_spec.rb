@@ -267,10 +267,10 @@ describe Piglet::Interpreter do
         @interpreter.to_pig_latin.should match(/FILTER \w+ BY a == 3/)
       end
 
-      # it 'outputs a FILTER statement with a complex test' do
-      #   @interpreter.interpret { dump(load('in').filter { |r| r.a > r.b && r.c != 3 }) }
-      #   @interpreter.to_pig_latin.should match(/FILTER \w+ BY a > b AND c != 3/)
-      # end
+      it 'outputs a FILTER statement with a complex test' do
+        @interpreter.interpret { dump(load('in').filter { |r| (r.a > r.b).and(r.c.ne(3)) }) }
+        @interpreter.to_pig_latin.should match(/FILTER \w+ BY \(a > b\) AND \(c != 3\)/)
+      end
     end
     
     describe 'SPLIT' do
@@ -408,6 +408,10 @@ describe Piglet::Interpreter do
       end
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\n(\w+) = DISTINCT \1;\nSTORE \2 INTO 'out1';\nSTORE \2 INTO 'out2';/)
     end
+  end
+
+  context 'literals' do
+    
   end
 
 end

@@ -45,6 +45,14 @@ module Piglet
       FieldInfixExpression.new('!=', self, other)
     end
     
+    def and(other)
+      FieldInfixExpression.new('AND', self, other)
+    end
+    
+    def or(other)
+      FieldInfixExpression.new('OR', self, other)
+    end
+    
     SYMBOLIC_OPERATORS.each do |op|
       define_method(op) { |other| FieldInfixExpression.new(op.to_s, self, other) }
     end
