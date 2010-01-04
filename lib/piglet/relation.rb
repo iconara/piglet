@@ -137,6 +137,15 @@ module Piglet
     def union(*relations)
       Union.new(*([self] + relations))
     end
+    
+    # Support for binary conditions, a.k.a. the ternary operator.
+    #
+    #   x.test(x.a > x.b, x.a, x.b) # => (a > b ? a : b)
+    # 
+    # Should only be used in the block given to #filter and #foreach
+    def test(test, if_true, if_false)
+      BinaryConditional.new(test, if_true, if_false)
+    end
 
     def method_missing(name, *args)
       if name.to_s =~ /^\w+$/ && args.empty?

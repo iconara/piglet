@@ -4,6 +4,7 @@ module Piglet # :nodoc:
   
   autoload_files = %w(
     assignment
+    binary_conditional
     cogroup
     cross
     describe
