@@ -3,15 +3,18 @@ module Piglet # :nodoc:
   VERSION = '0.1.1'
   
   autoload :Assignment, 'piglet/assignment'
-  autoload :Describe, 'piglet/describe'
-  autoload :Dump, 'piglet/dump'
-  autoload :Explain, 'piglet/explain'
-  autoload :Illustrate, 'piglet/illustrate'
   autoload :Interpreter, 'piglet/interpreter'
-  autoload :Load, 'piglet/load'
-  autoload :LoadAndStore, 'piglet/load_and_store'
-  autoload :Store, 'piglet/store'
-  autoload :Storing, 'piglet/storing'
+  
+  module Inout
+    autoload :Describe, 'piglet/inout/describe'
+    autoload :Dump, 'piglet/inout/dump'
+    autoload :Explain, 'piglet/inout/explain'
+    autoload :Illustrate, 'piglet/inout/illustrate'
+    autoload :Load, 'piglet/inout/load'
+    autoload :Output, 'piglet/inout/output'
+    autoload :StorageTypes, 'piglet/inout/storage_types'
+    autoload :Store, 'piglet/inout/store'
+  end
   
   module Relation
     autoload :Cogroup, 'piglet/relation/cogroup'

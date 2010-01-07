@@ -52,7 +52,7 @@ module Piglet
     # NOTE: the syntax load('path', :schema => {:a => :chararray, :b => :int})
     # would be nice, but the order of the keys can't be guaranteed in Ruby 1.8.
     def load(path, options={})
-      Load.new(path, options)
+      Inout::Load.new(path, options)
     end
   
     # STORE
@@ -61,28 +61,28 @@ module Piglet
     #   store(x, 'some/path', :using => 'Xyz') # => STORE x INTO 'some/path' USING Xyz
     #   store(x, 'some/path', :using => :pig_storage) # => STORE x INTO 'some/path' USING PigStorage
     def store(relation, path, options={})
-      @stores << Store.new(relation, path, options)
+      @stores << Inout::Store.new(relation, path, options)
     end
   
     # DUMP
     #
     #   dump(x) # => DUMP x
     def dump(relation)
-      @stores << Dump.new(relation)
+      @stores << Inout::Dump.new(relation)
     end
   
     # ILLUSTRATE
     #
     #   illustrate(x) # => ILLUSTRATE x
     def illustrate(relation)
-      @stores << Illustrate.new(relation)
+      @stores << Inout::Illustrate.new(relation)
     end
   
     # DESCRIBE
     #
     #   describe(x) # => DESCRIBE x
     def describe(relation)
-      @stores << Describe.new(relation)
+      @stores << Inout::Describe.new(relation)
     end
   
     # EXPLAIN
@@ -90,7 +90,7 @@ module Piglet
     #   explain    # => EXPLAIN
     #   explain(x) # => EXPLAIN(x)
     def explain(relation=nil)
-      @stores << Explain.new(relation)
+      @stores << Inout::Explain.new(relation)
     end
     
     # Support for binary conditions, a.k.a. the ternary operator.
