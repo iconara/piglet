@@ -2,7 +2,6 @@
 module Piglet # :nodoc:
   VERSION = '0.1.1'
   
-  autoload :Assignment, 'piglet/assignment'
   autoload :Interpreter, 'piglet/interpreter'
   
   module Inout
