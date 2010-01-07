@@ -1,6 +1,6 @@
 # :main: README.rdoc
 module Piglet # :nodoc:
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
   
   autoload :Interpreter, 'piglet/interpreter'
   
