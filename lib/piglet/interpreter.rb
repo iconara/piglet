@@ -101,6 +101,13 @@ module Piglet
     def test(test, if_true, if_false)
       BinaryConditional.new(test, if_true, if_false)
     end
+    
+    # Support for literals in FOREACH … GENERATE blocks.
+    #
+    #   x.foreach { |r| [literal("hello").as(:hello)] } # => FOREACH x GENERATE 'hello' AS hello
+    def literal(obj)
+      Literal.new(obj)
+    end
   
   private
   

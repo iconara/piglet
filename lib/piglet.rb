@@ -25,6 +25,7 @@ module Piglet # :nodoc:
     interpreter
     join
     limit
+    literal
     load
     load_and_store
     order

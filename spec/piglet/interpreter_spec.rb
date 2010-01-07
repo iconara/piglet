@@ -420,7 +420,40 @@ describe Piglet::Interpreter do
   end
 
   context 'literals' do
+    it 'outputs a literal string when passing a string to #literal' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [literal('hello').as(:world)]})
+      end
+      @interpreter.to_pig_latin.should include("'hello' AS world")
+    end
     
+    it 'outputs a literal integer when passing an integer to #literal' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [literal(3).as(:n)]})
+      end
+      @interpreter.to_pig_latin.should include("3 AS n")
+    end
+    
+    it 'outputs a literal float when passing a float to #literal' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [literal(3.14).as(:pi)]})
+      end
+      @interpreter.to_pig_latin.should include("3.14 AS pi")
+    end
+    
+    it 'outputs a literal string when passing an arbitrary object to #literal' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [literal(self).as(:interpreter)]})
+      end
+      @interpreter.to_pig_latin.should match(/'[^']+' AS interpreter/)
+    end
+    
+    it 'escapes single quotes in literal strings' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [literal("hello 'world'").as(:str)]})
+      end
+      @interpreter.to_pig_latin.should include("'hello \\'world\\'' AS str")
+    end
   end
 
 end
