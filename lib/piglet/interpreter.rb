@@ -52,7 +52,9 @@ module Piglet
     # NOTE: the syntax load('path', :schema => {:a => :chararray, :b => :int})
     # would be nice, but the order of the keys can't be guaranteed in Ruby 1.8.
     def load(path, options={})
-      Inout::Load.new(path, options)
+      load = Inout::Load.new(path, options)
+      load.extend Piglet::Relation::Relation
+      load
     end
   
     # STORE

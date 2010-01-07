@@ -1,7 +1,6 @@
 module Piglet
   module Inout
     class Load # :nodoc:
-      include Piglet::Relation::Relation
       include StorageTypes
     
       def initialize(path, options={})
