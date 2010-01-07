@@ -92,6 +92,15 @@ module Piglet
     def explain(relation=nil)
       @stores << Explain.new(relation)
     end
+    
+    # Support for binary conditions, a.k.a. the ternary operator.
+    #
+    #   x.test(x.a > x.b, x.a, x.b) # => (a > b ? a : b)
+    # 
+    # Should only be used in the block given to #filter and #foreach
+    def test(test, if_true, if_false)
+      BinaryConditional.new(test, if_true, if_false)
+    end
   
   private
   

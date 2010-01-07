@@ -76,10 +76,4 @@ describe Piglet::Relation do
     end
   end
   
-  describe '#test' do
-    it 'returns a field expression with an ?: expression' do
-      @relation.test(@relation.a == @relation.b, @relation.a, @relation.b).to_s.should eql('(a == b ? a : b)')
-    end
-  end
-  
 end

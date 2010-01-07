@@ -410,6 +410,15 @@ describe Piglet::Interpreter do
     end
   end
 
+  context 'misc. operators' do
+    it 'outputs a binary conditional when using #test' do
+      @interpreter.interpret do
+        dump(load('in').foreach { |r| [test(r.a == r.b, r.a, r.b)]})
+      end
+      @interpreter.to_pig_latin.should include('(a == b ? a : b)')
+    end
+  end
+
   context 'literals' do
     
   end
