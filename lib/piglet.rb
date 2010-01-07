@@ -2,37 +2,32 @@
 module Piglet # :nodoc:
   VERSION = '0.1.1'
   
-  autoload_files = %w(
-    assignment
-    cogroup
-    cross
-    describe
-    distinct
-    dump
-    explain
-    filter
-    foreach
-    group
-    illustrate
-    interpreter
-    join
-    limit
-    load
-    load_and_store
-    order
-    relation
-    sample
-    split
-    store
-    storing
-    stream
-    union
-  )
+  autoload :Assignment, 'piglet/assignment'
+  autoload :Describe, 'piglet/describe'
+  autoload :Dump, 'piglet/dump'
+  autoload :Explain, 'piglet/explain'
+  autoload :Illustrate, 'piglet/illustrate'
+  autoload :Interpreter, 'piglet/interpreter'
+  autoload :Load, 'piglet/load'
+  autoload :LoadAndStore, 'piglet/load_and_store'
+  autoload :Store, 'piglet/store'
+  autoload :Storing, 'piglet/storing'
   
-  autoload_files.each do |f|
-    c = f.split('_').map { |s| s.capitalize }.join.to_sym
-    p = "piglet/#{f}"
-    autoload c, p
+  module Relation
+    autoload :Cogroup, 'piglet/relation/cogroup'
+    autoload :Cross, 'piglet/relation/cross'
+    autoload :Distinct, 'piglet/relation/distinct'
+    autoload :Filter, 'piglet/relation/filter'
+    autoload :Foreach, 'piglet/relation/foreach'
+    autoload :Group, 'piglet/relation/group'
+    autoload :Join, 'piglet/relation/join'
+    autoload :Limit, 'piglet/relation/limit'
+    autoload :Order, 'piglet/relation/order'
+    autoload :Relation, 'piglet/relation/relation'
+    autoload :Sample, 'piglet/relation/sample'
+    autoload :Split, 'piglet/relation/split'
+    autoload :Stream, 'piglet/relation/stream'
+    autoload :Union, 'piglet/relation/union'
   end
   
   module Field

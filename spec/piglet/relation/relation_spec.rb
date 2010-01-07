@@ -1,11 +1,11 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 
-describe Piglet::Relation do
+describe Piglet::Relation::Relation do
   
   before do
     @relation = Object.new
-    @relation.extend Piglet::Relation
+    @relation.extend Piglet::Relation::Relation
   end
   
   it 'has a alias' do
@@ -16,7 +16,7 @@ describe Piglet::Relation do
     aliases = { }
     1000.times do
       @relation = Object.new
-      @relation.extend Piglet::Relation
+      @relation.extend Piglet::Relation::Relation
       aliases.should_not have_key(@relation.alias)
       aliases[@relation.alias] = @relation
     end
@@ -37,7 +37,7 @@ describe Piglet::Relation do
   describe '#cross' do
     it 'returns a new relation with the target relation as one of the sources' do
       other = Object.new
-      other.extend Piglet::Relation
+      other.extend Piglet::Relation::Relation
       @relation.cross(other).sources.should include(@relation)
     end
   end
@@ -45,7 +45,7 @@ describe Piglet::Relation do
   describe '#union' do
     it 'returns a new relation with the target relation as one of the sources' do
       other = Object.new
-      other.extend Piglet::Relation
+      other.extend Piglet::Relation::Relation
       @relation.union(other).sources.should include(@relation)
     end
   end

@@ -1,6 +1,6 @@
 module Piglet
   class Load # :nodoc:
-    include Relation
+    include Relation::Relation
     include LoadAndStore
     
     def initialize(path, options={})
