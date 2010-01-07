@@ -99,14 +99,14 @@ module Piglet
     # 
     # Should only be used in the block given to #filter and #foreach
     def test(test, if_true, if_false)
-      BinaryConditional.new(test, if_true, if_false)
+      Field::BinaryConditional.new(test, if_true, if_false)
     end
     
     # Support for literals in FOREACH … GENERATE blocks.
     #
     #   x.foreach { |r| [literal("hello").as(:hello)] } # => FOREACH x GENERATE 'hello' AS hello
     def literal(obj)
-      Literal.new(obj)
+      Field::Literal.new(obj)
     end
   
   private

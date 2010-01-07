@@ -140,14 +140,14 @@ module Piglet
 
     def method_missing(name, *args)
       if name.to_s =~ /^\w+$/ && args.empty?
-        Field.new(name, self)
+        Field::Reference.new(name, self)
       else
         super
       end
     end
     
     def [](n)
-      Field.new("\$#{n}", self)
+      Field::Reference.new("\$#{n}", self)
     end
 
     def hash

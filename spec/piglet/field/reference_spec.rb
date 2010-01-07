@@ -1,10 +1,10 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 
 
-describe Piglet::Field do
+describe Piglet::Field::Reference do
 
   before do
-    @field = Piglet::Field.new('field')
+    @field = Piglet::Field::Reference.new('field')
   end
   
   describe '#to_s' do
@@ -13,7 +13,7 @@ describe Piglet::Field do
     end
     
     it 'returns a string with the field name (as a symbol)' do
-      @field = Piglet::Field.new(:field)
+      @field = Piglet::Field::Reference.new(:field)
       @field.to_s.should eql("field")
     end
   end
@@ -52,8 +52,8 @@ describe Piglet::Field do
   
   context 'infix and unary operators' do
     before do
-      @field1 = Piglet::Field.new('field1')
-      @field2 = Piglet::Field.new('field2')
+      @field1 = Piglet::Field::Reference.new('field1')
+      @field2 = Piglet::Field::Reference.new('field2')
     end
     
     [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/].each do |op|

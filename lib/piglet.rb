@@ -4,20 +4,12 @@ module Piglet # :nodoc:
   
   autoload_files = %w(
     assignment
-    binary_conditional
     cogroup
     cross
     describe
     distinct
     dump
     explain
-    field
-    field_expression_functions
-    field_function_expression
-    field_infix_expression
-    field_prefix_expression
-    field_rename
-    field_suffix_expression
     filter
     foreach
     group
@@ -25,7 +17,6 @@ module Piglet # :nodoc:
     interpreter
     join
     limit
-    literal
     load
     load_and_store
     order
@@ -42,6 +33,18 @@ module Piglet # :nodoc:
     c = f.split('_').map { |s| s.capitalize }.join.to_sym
     p = "piglet/#{f}"
     autoload c, p
+  end
+  
+  module Field
+    autoload :BinaryConditional, 'piglet/field/binary_conditional'
+    autoload :CallExpression, 'piglet/field/call_expression'
+    autoload :InfixExpression, 'piglet/field/infix_expression'
+    autoload :Literal, 'piglet/field/literal'
+    autoload :Operators, 'piglet/field/operators'
+    autoload :PrefixExpression, 'piglet/field/prefix_expression'
+    autoload :Reference, 'piglet/field/reference'
+    autoload :Rename, 'piglet/field/rename'
+    autoload :SuffixExpression, 'piglet/field/suffix_expression'
   end
 
   class NotSupportedError < StandardError; end
