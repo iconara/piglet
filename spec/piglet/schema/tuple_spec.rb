@@ -52,6 +52,18 @@ describe Tuple do
       tuple.field_type(:a).should be_a(Tuple)
       tuple.field_type(:a).field_names.should eql([:c, :d])
     end
+
+    it 'accepts a Bag object as the type of a field' do
+      tuple = Tuple.parse([[:a, Bag.new(Tuple.parse([:c, :d]))]])
+      tuple.field_type(:a).should be_a(Bag)
+      tuple.field_type(:a).field_names.should eql([:c, :d])
+    end
+
+    it 'can parse a Bag from a field typed as :bag' do
+      tuple = Tuple.parse([[:a, :bag, [:c, :d]]])
+      tuple.field_type(:a).should be_a(Bag)
+      tuple.field_type(:a).field_names.should eql([:c, :d])
+    end
   end
   
 end

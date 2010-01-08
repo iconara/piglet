@@ -49,6 +49,8 @@ module Piglet
             case tail.first
             when :tuple
               type_map[head] = parse(*tail[1..-1])
+            when :bag
+              type_map[head] = Bag.new(parse(*tail[1..-1]))
             else
               type_map[head] = tail.first
             end
