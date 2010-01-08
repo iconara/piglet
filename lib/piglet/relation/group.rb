@@ -7,6 +7,16 @@ module Piglet
         options ||= {}
         @sources, @grouping, @parallel = [relation], grouping, options[:parallel]
       end
+      
+      def schema
+        parent = @sources.first
+        if @grouping.size == 1
+          group_type = parent.schema.field_type(@grouping.first)
+        else
+          group_type = :tuple
+        end
+        Piglet::Schema::Tuple.new([[:group, group_type], [parent.alias.to_sym, :bag]])
+      end
     
       def to_s
         str = "GROUP #{@sources.first.alias} BY "

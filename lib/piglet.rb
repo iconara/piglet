@@ -2,6 +2,9 @@
 module Piglet # :nodoc:
   VERSION = '0.1.2'
   
+  class PigletError < StandardError; end
+  class NotSupportedError < PigletError; end
+  
   autoload :Interpreter, 'piglet/interpreter'
   
   module Inout
@@ -43,6 +46,10 @@ module Piglet # :nodoc:
     autoload :Rename, 'piglet/field/rename'
     autoload :SuffixExpression, 'piglet/field/suffix_expression'
   end
-
-  class NotSupportedError < StandardError; end
+  
+  module Schema
+    autoload :Tuple, 'piglet/schema/tuple'
+    
+    class SchemaError < PigletError; end
+  end
 end

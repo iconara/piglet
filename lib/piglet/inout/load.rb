@@ -1,11 +1,16 @@
 module Piglet
   module Inout
     class Load # :nodoc:
+      include Piglet::Relation::Relation
       include StorageTypes
     
       def initialize(path, options={})
         options ||= {}
         @path, @using, @schema = path, options[:using], options[:schema]
+      end
+    
+      def schema
+        Piglet::Schema::Tuple.new(@schema) if @schema
       end
     
       def to_s

@@ -142,6 +142,16 @@ module Piglet
       def field(name)
         Field::Reference.new(name, self)
       end
+      
+      def schema
+        if @sources.nil?
+          raise Piglet::Schema::SchemaError, 'Could not determine the schema since there was no source relation and this relation does not define its own schema'
+        elsif @sources.size > 1
+          raise Piglet::Schema::SchemaError, 'Could not determine the schema since there were more than one source relation'
+        else
+          @sources.first.schema
+        end
+      end
 
       def method_missing(name, *args)
         if name.to_s =~ /^\w+$/ && args.empty?

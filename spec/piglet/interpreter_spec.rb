@@ -500,4 +500,73 @@ describe Piglet::Interpreter do
     end
   end
 
+  context 'schemas' do
+    it 'knows the schema of a relation returned by #load, with types' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          schema = load('in', :schema => [[:a, :chararray], [:b, :chararray]]).schema
+          throw :schema, schema
+        end
+      end
+      schema.field_names.should eql([:a, :b])
+      schema.field_type(:a).should eql(:chararray)
+    end
+    
+    it 'knows the schema of a relation returned by #load, without types' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          schema = load('in', :schema => [:a, :b]).schema
+          throw :schema, schema
+        end
+      end
+      schema.field_names.should eql([:a, :b])
+      schema.field_type(:a).should eql(:bytearray)
+    end
+    
+    it 'knows the schema of a relation returned by #load, with and without types' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          schema = load('in', :schema => [[:a, :float], :b]).schema
+          throw :schema, schema
+        end
+      end
+      schema.field_names.should eql([:a, :b])
+      schema.field_type(:a).should eql(:float)
+    end
+    
+    it 'does not know anything about the schema of a relation returned by #load if no schema was given' do
+      relation = catch(:relation) do
+        @interpreter.interpret do
+          throw :relation, load('in')
+        end
+      end
+      relation.schema.should be_nil
+    end
+    
+    it 'knows the schema of a relation derived through non-schema-changing operations' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation = load('in', :schema => [[:a, :float], [:b, :int]]).limit(3).sample(0.1).distinct.order(:a)
+          throw :schema, relation.schema
+        end
+      end
+      schema.field_names.should eql([:a, :b])
+      schema.field_type(:a).should eql(:float)
+      schema.field_type(:b).should eql(:int)
+    end
+    
+    it 'knows the schema of a relation grouped on one field' do
+      relation = catch(:relation) do
+        @interpreter.interpret do
+          relation = load('in', :schema => [[:a, :float], [:b, :int]]).group(:a)
+          throw :relation, relation
+        end
+      end
+      source_relation_name = relation.sources.first.alias.to_sym
+      relation.schema.field_names.should eql([:group, source_relation_name])
+      relation.schema.field_type(:group).should eql(:float)
+      relation.schema.field_type(source_relation_name).should eql(:bag)
+    end
+  end
+
 end
