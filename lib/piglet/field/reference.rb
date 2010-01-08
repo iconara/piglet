@@ -13,16 +13,20 @@ module Piglet
         true
       end
     
+      def field(name)
+        Reference.new(name, self, :explicit_ancestry => true)
+      end
+    
       def method_missing(name, *args)
         if name.to_s =~ /^\w+$/ && args.empty?
-          Reference.new(name, self, :explicit_ancestry => true)
+          field(name)
         else
           super
         end
       end
     
       def [](n)
-        Reference.new("\$#{n}", self, :explicit_ancestry => true)
+        field("\$#{n}")
       end
     
       def to_s

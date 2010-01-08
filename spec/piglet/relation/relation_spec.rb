@@ -74,6 +74,10 @@ describe Piglet::Relation::Relation do
     it 'returns fields with positional notation' do
       @relation[1].to_s.should eql('$1')
     end
+    
+    it 'returns fields through a direct call to #field' do
+      @relation.field(:a).to_s.should eql('a')
+    end
   end
   
 end

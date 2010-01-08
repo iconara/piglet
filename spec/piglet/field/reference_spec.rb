@@ -36,6 +36,20 @@ describe Piglet::Field::Reference do
     end
   end
   
+  context 'nested fields' do
+    it 'handles nested field access' do
+      @field.a.to_s.should eql('field.a')
+    end
+    
+    it 'handles nested field access through #field' do
+      @field.field(:a).to_s.should eql('field.a')
+    end
+    
+    it 'handles nested field access throuh []' do
+      @field[0].to_s.should eql('field.$0')
+    end
+  end
+  
   context 'field renaming' do
     it 'supports renaming a field' do
       @field.as('x').to_s.should eql('field AS x')

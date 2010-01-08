@@ -139,16 +139,20 @@ module Piglet
         Union.new(*([self] + relations))
       end
 
+      def field(name)
+        Field::Reference.new(name, self)
+      end
+
       def method_missing(name, *args)
         if name.to_s =~ /^\w+$/ && args.empty?
-          Field::Reference.new(name, self)
+          field(name)
         else
           super
         end
       end
     
       def [](n)
-        Field::Reference.new("\$#{n}", self)
+        field("\$#{n}")
       end
 
       def hash
