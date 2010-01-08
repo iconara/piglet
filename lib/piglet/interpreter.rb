@@ -27,7 +27,6 @@ module Piglet
         unless store.relation.nil?
           assignments(store.relation, handled_relations).each do |assignment|
             statements << assignment
-            handled_relations << assignment.target
           end
         end
         statements << store
@@ -116,6 +115,7 @@ module Piglet
     def assignments(relation, ignore_set)
       return [] if ignore_set.include?(relation)
       assignment = Assignment.new(relation)
+      ignore_set << relation
       if relation.sources
         (relation.sources.map { |source| assignments(source, ignore_set) } + [assignment]).flatten
       else

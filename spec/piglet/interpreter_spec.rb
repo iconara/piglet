@@ -456,4 +456,48 @@ describe Piglet::Interpreter do
     end
   end
 
+  context 'long and complex scripts' do
+    before do
+      @interpreter.interpret do
+        sessions = load('sessions', :schema => [
+          [:ad_id, :chararray],
+          [:site, :chararray],
+          [:size, :chararray],
+          [:name, :chararray],
+          [:impression, :int],
+          [:engagement, :int],
+          [:click_thru, :int]
+        ])
+        %w(site size name).each do |dimension|
+          result = sessions.group(:ad_id, dimension).foreach do |r|
+            [
+              r[0].ad_id.as(:ad_id),
+              literal(dimension).as(:dimension),
+              r[0].field(dimension).as(:value),
+              r[1].exposure.sum.as(:exposures),
+              r[1].impression.sum.as(:impressions),
+              r[1].engagement.sum.as(:engagements),
+              r[1].click_thru.sum.as(:click_thrus)
+            ]
+          end
+          store(result, "report_metrics-#{dimension}")
+        end
+      end
+      @output = @interpreter.to_pig_latin
+    end
+
+    it 'outputs the correct number of LOAD statements' do
+      @output.scan(/LOAD/).size.should eql(1)
+    end
+    
+    it 'outputs the correct number of STORE statements' do
+      @output.scan(/STORE/).size.should eql(3)
+    end
+
+    it 'doesn\'t assign to the same relation twice' do
+      @assignments = @output.scan(/^(\w+)(?=\s*=)/).flatten
+      @assignments.uniq.should eql(@assignments)
+    end
+  end
+
 end
