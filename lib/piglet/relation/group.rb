@@ -10,12 +10,14 @@ module Piglet
       
       def schema
         parent = @sources.first
+        parent_schema = parent.schema
         if @grouping.size == 1
           group_type = parent.schema.field_type(@grouping.first)
         else
-          group_type = :tuple
+          description = @grouping.map { |field| [field, parent_schema.field_type(field)] }
+          group_type = Piglet::Schema::Tuple.new(description)
         end
-        Piglet::Schema::Tuple.new([[:group, group_type], [parent.alias.to_sym, :bag]])
+        Piglet::Schema::Tuple.new([[:group, group_type], [parent.alias.to_sym, Piglet::Schema::Bag.new(parent_schema)]])
       end
     
       def to_s

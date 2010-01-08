@@ -565,7 +565,27 @@ describe Piglet::Interpreter do
       source_relation_name = relation.sources.first.alias.to_sym
       relation.schema.field_names.should eql([:group, source_relation_name])
       relation.schema.field_type(:group).should eql(:float)
-      relation.schema.field_type(source_relation_name).should eql(:bag)
+      relation.schema.field_type(source_relation_name).should be_a(Piglet::Schema::Bag)
+      relation.schema.field_type(source_relation_name).field_names.should eql([:a, :b])
+      relation.schema.field_type(source_relation_name).field_type(:a).should eql(:float)
+    end
+
+    it 'knows the schema of a relation grouped on more than one field' do
+      relation = catch(:relation) do
+        @interpreter.interpret do
+          relation = load('in', :schema => [[:a, :float], [:b, :int]]).group(:a, :b)
+          throw :relation, relation
+        end
+      end
+      source_relation_name = relation.sources.first.alias.to_sym
+      relation.schema.field_names.should eql([:group, source_relation_name])
+      relation.schema.field_type(:group).should be_a(Piglet::Schema::Tuple)
+      relation.schema.field_type(:group).field_names.should eql([:a, :b])
+      relation.schema.field_type(:group).field_type(:a).should eql(:float)
+      relation.schema.field_type(source_relation_name).should be_a(Piglet::Schema::Bag)
+      relation.schema.field_type(source_relation_name).field_names.should eql([:a, :b])
+      relation.schema.field_type(source_relation_name).field_type(:b).should eql(:int)
+      
     end
   end
 

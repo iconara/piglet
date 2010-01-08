@@ -48,6 +48,7 @@ module Piglet # :nodoc:
   end
   
   module Schema
+    autoload :Bag, 'piglet/schema/bag'
     autoload :Tuple, 'piglet/schema/tuple'
     
     class SchemaError < PigletError; end
