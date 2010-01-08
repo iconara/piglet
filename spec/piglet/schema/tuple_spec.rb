@@ -66,4 +66,36 @@ describe Tuple do
     end
   end
   
+  describe '#union' do
+    it 'creates a new tuple with the fields from two tuples' do
+      t1 = Tuple.parse([:a, :b, :c])
+      t2 = Tuple.parse([:d, :e, :f])
+      t3 = t1.union(t2)
+      t3.field_names.should eql([:a, :b, :c, :d, :e, :f])
+    end
+    
+    it 'creates a new tuple with the fields from three tuples' do
+      t1 = Tuple.parse([:a, :b, :c])
+      t2 = Tuple.parse([:d, :e, :f])
+      t3 = Tuple.parse([:g, :h, :i])
+      t4 = t1.union(t2, t3)
+      t4.field_names.should eql([:a, :b, :c, :d, :e, :f, :g, :h, :i])
+    end
+
+    it 'creates a new tuple with the fields from three tuples (arguments as an array)' do
+      t1 = Tuple.parse([:a, :b, :c])
+      t2 = Tuple.parse([:d, :e, :f])
+      t3 = Tuple.parse([:g, :h, :i])
+      t4 = t1.union([t2, t3])
+      t4.field_names.should eql([:a, :b, :c, :d, :e, :f, :g, :h, :i])
+    end
+
+    it 'retains all the fields even if some have the same name' do
+      t1 = Tuple.parse([:a, :b, :c])
+      t2 = Tuple.parse([:b, :c, :d])
+      t3 = t1.union(t2)
+      t3.field_names.should eql([:a, :b, :c, :b, :c, :d])
+    end
+  end
+  
 end

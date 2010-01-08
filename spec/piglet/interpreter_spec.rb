@@ -585,8 +585,69 @@ describe Piglet::Interpreter do
       relation.schema.field_type(source_relation_name).should be_a(Piglet::Schema::Bag)
       relation.schema.field_type(source_relation_name).field_names.should eql([:a, :b])
       relation.schema.field_type(source_relation_name).field_type(:b).should eql(:int)
-      
     end
+
+    it 'knows the schema of a relation cross joined with itself' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation = load('in', :schema => [[:a, :float], [:b, :int]])
+          relation = relation.cross(relation)
+          throw :schema, relation.schema
+        end
+      end
+      schema.field_names.should eql([:a, :b, :a, :b])
+      schema.field_type(:a).should eql(:float)
+      schema.field_type(:b).should eql(:int)
+    end
+    
+    it 'knows the schema of a relation cross joined with another' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = load('in2', :schema => [[:c, :chararray], [:d, :double]])
+          relation3 = relation1.cross(relation2)
+          throw :schema, relation3.schema
+        end
+      end
+      schema.field_names.should eql([:a, :b, :c, :d])
+      schema.field_type(:a).should eql(:float)
+      schema.field_type(:b).should eql(:int)
+      schema.field_type(:c).should eql(:chararray)
+      schema.field_type(:d).should eql(:double)
+    end
+
+    it 'knows the schema of a relation joined with another' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = load('in2', :schema => [[:c, :int], [:d, :double]])
+          relation3 = relation1.join(relation1 => :b, relation2 => :c)
+          throw :schema, relation3.schema
+        end
+      end
+      schema.field_names.should eql([:a, :b, :c, :d])
+      schema.field_type(:a).should eql(:float)
+      schema.field_type(:b).should eql(:int)
+      schema.field_type(:c).should eql(:int)
+      schema.field_type(:d).should eql(:double)
+    end
+
+    it 'knows the schema of a relation cogrouped with another' do
+      relation1, relation2, relation3 = catch(:relations) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = load('in2', :schema => [[:c, :int], [:d, :double]])
+          relation3 = relation1.cogroup(relation1 => :b, relation2 => :c)
+          throw :relations, [relation1, relation2, relation3]
+        end
+      end
+      relation3.schema.field_names.should eql([:group, relation1.alias.to_sym, relation2.alias.to_sym])
+      relation3.schema.field_type(relation1.alias.to_sym).should be_a(Piglet::Schema::Bag)
+      relation3.schema.field_type(relation2.alias.to_sym).should be_a(Piglet::Schema::Bag)
+      relation3.schema.field_type(relation1.alias.to_sym).field_names.should eql([:a, :b])
+      relation3.schema.field_type(relation2.alias.to_sym).field_names.should eql([:c, :d])
+    end
+    
   end
 
 end

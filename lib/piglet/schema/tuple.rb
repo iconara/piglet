@@ -4,7 +4,10 @@ module Piglet
       attr_reader :field_names
       
       def initialize(field_names, type_map)
-        @field_names, @type_map = field_names, type_map
+        @field_names = [ ]
+        @field_names = field_names.dup if field_names
+        @type_map = { }
+        @type_map = type_map.dup if type_map
       end
       
       # Returns a new Tuple with a schema described by the specified array.
@@ -58,6 +61,18 @@ module Piglet
           else
             type_map[component] = :bytearray
             field_names << component
+          end
+        end
+        Tuple.new(field_names, type_map)
+      end
+      
+      def union(*tuples)
+        field_names = @field_names.dup
+        type_map = @type_map.dup
+        tuples.flatten.each do |tuple|
+          tuple.field_names.each do |f|
+            field_names << f
+            type_map[f] = tuple.field_type(f)
           end
         end
         Tuple.new(field_names, type_map)

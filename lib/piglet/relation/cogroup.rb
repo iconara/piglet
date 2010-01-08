@@ -8,6 +8,21 @@ module Piglet
         @sources = @join_fields.keys
         @parallel = description[:parallel]
       end
+      
+      def schema
+        first_schema = @sources.first.schema
+        join_fields = @join_fields[@sources.first]
+        if join_fields.is_a?(Enumerable) && join_fields.size > 1
+          group_type = join_fields.map { |f| [f, first_schema.field_type[f]] }
+          description = [[:group, :tuple, group_type]]
+        else
+          description = [[:group, *join_fields]]
+        end
+        @sources.each do |source|
+          description << [source.alias.to_sym, Piglet::Schema::Bag.new(source.schema)]
+        end
+        Piglet::Schema::Tuple.parse(description)
+      end
     
       def to_s
         joins = @sources.map do |s|

@@ -9,6 +9,11 @@ module Piglet
         @using = description[:using]
         @parallel = description[:parallel]
       end
+      
+      def schema
+        schemas = @sources.map { |s| s.schema }
+        schemas.first.union(schemas[1..-1])
+      end
     
       def to_s
         joins = @sources.map { |s| "#{s.alias} BY #{@join_fields[s]}" }.join(', ')
