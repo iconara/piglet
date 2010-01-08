@@ -14,10 +14,14 @@ module Piglet
         if @grouping.size == 1
           group_type = parent.schema.field_type(@grouping.first)
         else
-          description = @grouping.map { |field| [field, parent_schema.field_type(field)] }
-          group_type = Piglet::Schema::Tuple.new(description)
+          group_type = Piglet::Schema::Tuple.parse(
+            @grouping.map { |field| [field, parent_schema.field_type(field)] }
+          )
         end
-        Piglet::Schema::Tuple.new([[:group, group_type], [parent.alias.to_sym, Piglet::Schema::Bag.new(parent_schema)]])
+        Piglet::Schema::Tuple.parse([
+          [:group, group_type],
+          [parent.alias.to_sym, Piglet::Schema::Bag.new(parent_schema)]
+        ])
       end
     
       def to_s

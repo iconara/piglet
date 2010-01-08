@@ -10,7 +10,7 @@ module Piglet
       end
     
       def schema
-        Piglet::Schema::Tuple.new(@schema) if @schema
+        Piglet::Schema::Tuple.parse(@schema) if @schema
       end
     
       def to_s
