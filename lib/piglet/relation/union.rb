@@ -4,7 +4,7 @@ module Piglet
       include Relation
     
       def initialize(*relations)
-        @sources = relations
+        @sources = [relations].flatten
       end
     
       def to_s
