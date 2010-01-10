@@ -20,3 +20,4 @@ doc
 pkg
 
 ## PROJECT::SPECIFIC
+pig_*.log
