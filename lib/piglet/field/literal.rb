@@ -3,9 +3,10 @@ module Piglet
     class Literal
       include Field
     
-      def initialize(obj)
+      def initialize(obj, options=nil)
+        options ||= {}
         @obj = obj
-        @type = literal_type(obj)
+        @type = options[:type] || literal_type(obj)
       end
     
       def to_s
