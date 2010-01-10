@@ -25,7 +25,7 @@ module Piglet
       end
     
       def not
-        PrefixExpression.new('NOT', self, :type => :boolean)
+        PrefixExpression.new('NOT', self, true, :type => :boolean)
       end
     
       def null?
@@ -37,7 +37,7 @@ module Piglet
       end
     
       def cast(type)
-        PrefixExpression.new("(#{type.to_s})", self, :type => type.to_sym)
+        PrefixExpression.new("(#{type.to_s})", self, true, :type => type.to_sym)
       end
     
       def matches(pattern)
@@ -47,24 +47,24 @@ module Piglet
       end
     
       def neg
-        PrefixExpression.new('-', self, false)
+        PrefixExpression.new('-', self, false, :type => self.type)
       end
     
       def ne(other)
-        InfixExpression.new('!=', self, other)
+        InfixExpression.new('!=', self, other, :type => :boolean)
       end
     
       def and(other)
-        InfixExpression.new('AND', self, other)
+        InfixExpression.new('AND', self, other, :type => :boolean)
       end
     
       def or(other)
-        InfixExpression.new('OR', self, other)
+        InfixExpression.new('OR', self, other, :type => :boolean)
       end
     
       SYMBOLIC_OPERATORS.each do |op|
         define_method(op) do |other|
-          InfixExpression.new(op.to_s, self, other)
+          InfixExpression.new(op.to_s, self, other, :type => symbolic_operator_return_type(op, self, other))
         end
       end
     
@@ -99,6 +99,32 @@ module Piglet
           expression_type
         when :tokenize
           :bag
+        else
+          nil
+        end
+      end
+      
+      def symbolic_operator_return_type(operator, left_expression, right_expression)
+        case operator
+        when :==, :>, :<, :>=, :<=
+          :boolean
+        when :%
+          :int
+        else # :+, :-, :*, :/
+          nil
+        end
+      end
+      
+      def expression_type(expression)
+        case expression
+        when Field
+          expression.type
+        when Integer
+          :int
+        when Numeric
+          :float
+        when true, false
+          :boolean
         else
           nil
         end
