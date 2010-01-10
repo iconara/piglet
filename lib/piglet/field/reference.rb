@@ -7,6 +7,7 @@ module Piglet
         options ||= {}
         @name, @parent = name, relation
         @explicit_ancestry = options[:explicit_ancestry] || false
+        @type = options[:type]
       end
     
       def simple?

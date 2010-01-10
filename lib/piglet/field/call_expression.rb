@@ -3,18 +3,18 @@ module Piglet
     class CallExpression # :nodoc:
       include Field
     
-      def initialize(name, inner_expression, options=nil)
+      def initialize(function_name, inner_expression, options=nil)
         options ||= {}
-        @name, @inner_expression = name, inner_expression
-        @new_name = options[:as]
+        @function_name, @inner_expression = function_name, inner_expression
+        @type = options[:type] || inner_expression.type
       end
-    
+      
       def simple?
         false
       end
     
       def to_s
-        "#{@name}(#{@inner_expression})"
+        "#{@function_name}(#{@inner_expression})"
       end
     end
   end

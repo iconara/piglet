@@ -140,7 +140,8 @@ module Piglet
       end
 
       def field(name)
-        Field::Reference.new(name, self)
+        type = schema.field_type(name) rescue nil
+        Field::Reference.new(name, self, :type => type)
       end
       
       def schema

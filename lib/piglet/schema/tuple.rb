@@ -44,6 +44,7 @@ module Piglet
       def self.parse(description)
         field_names = [ ]
         type_map = { }
+        index = 0
         description.map do |component|
           case component
           when Enumerable
@@ -51,17 +52,18 @@ module Piglet
             tail = component[1..-1]
             case tail.first
             when :tuple
-              type_map[head] = parse(*tail[1..-1])
+              type_map[head || index] = parse(*tail[1..-1])
             when :bag
-              type_map[head] = Bag.new(parse(*tail[1..-1]))
+              type_map[head || index] = Bag.new(parse(*tail[1..-1]))
             else
-              type_map[head] = tail.first
+              type_map[head || index] = tail.first
             end
             field_names << head
           else
             type_map[component] = :bytearray
             field_names << component
           end
+          index += 1
         end
         Tuple.new(field_names, type_map)
       end
@@ -79,6 +81,9 @@ module Piglet
       end
       
       def field_type(field_name)
+        if Integer === field_name
+          field_name = @field_names[field_name] || field_name
+        end
         @type_map[field_name]
       end
 

@@ -64,6 +64,11 @@ describe Tuple do
       tuple.field_type(:a).should be_a(Bag)
       tuple.field_type(:a).field_names.should eql([:c, :d])
     end
+    
+    it 'can parse a description that lacks field names (and fall back to making the fields accessible by index)' do
+      tuple = Tuple.parse([[nil, :chararray], [nil, :int]])
+      tuple.field_type(1).should eql(:int)
+    end
   end
   
   describe '#union' do

@@ -6,6 +6,11 @@ module Piglet
       def initialize(relation, field_expressions)
         @sources, @field_expressions = [relation], [field_expressions].flatten
       end
+      
+      def schema
+        description = @field_expressions.map { |expr| [expr.name, expr.type] }
+        Piglet::Schema::Tuple.parse(description)
+      end
     
       def to_s
         "FOREACH #{@sources.first.alias} GENERATE #{field_expressions_string}"

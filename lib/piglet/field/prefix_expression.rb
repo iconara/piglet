@@ -3,8 +3,10 @@ module Piglet
     class PrefixExpression # :nodoc:
       include Field
     
-      def initialize(operator, expression, space_between=true)
+      def initialize(operator, expression, space_between=true, options=nil)
+        options ||= {}
         @operator, @expression, @space_between = operator, expression, space_between
+        @type = options[:type] || expression.type
       end
     
       def simple?

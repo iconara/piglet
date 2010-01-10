@@ -19,7 +19,7 @@ describe Piglet::Field::Reference do
   end
 
   context 'eval/aggregate functions' do
-    %w(avg count diff max min size sum tokenize).each do |function_name|
+    %w(avg count max min size sum tokenize).each do |function_name|
       it "supports \"#{function_name.upcase}\" through ##{function_name}" do
         @field.send(function_name).to_s.should eql("#{function_name.upcase}(field)")
       end

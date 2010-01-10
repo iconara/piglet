@@ -2,16 +2,22 @@ module Piglet
   module Field
     module Field # :nodoc:
       SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
-      FUNCTIONS = [:avg, :count, :diff, :max, :min, :size, :sum, :tokenize]
+      FUNCTIONS = [:avg, :count, :max, :min, :size, :sum, :tokenize]
+
+      attr_reader :name, :type
     
       FUNCTIONS.each do |fun|
         define_method(fun) do
-          CallExpression.new(fun.to_s.upcase, self)
+          CallExpression.new(fun.to_s.upcase, self, :type => function_return_type(fun, self.type))
         end
       end
 
       def empty?
-        CallExpression.new('IsEmpty', self)
+        CallExpression.new('IsEmpty', self, :type => :boolean)
+      end
+      
+      def diff(other)
+        raise NotSupportedError
       end
     
       def as(new_name)
@@ -19,25 +25,25 @@ module Piglet
       end
     
       def not
-        PrefixExpression.new('NOT', self)
+        PrefixExpression.new('NOT', self, :type => :boolean)
       end
     
       def null?
-        SuffixExpression.new('is null', self)
+        SuffixExpression.new('is null', self, :type => :boolean)
       end
     
       def not_null?
-        SuffixExpression.new('is not null', self)
+        SuffixExpression.new('is not null', self, :type => :boolean)
       end
     
       def cast(type)
-        PrefixExpression.new("(#{type.to_s})", self)
+        PrefixExpression.new("(#{type.to_s})", self, :type => type.to_sym)
       end
     
       def matches(pattern)
         regex_options_pattern = /^\(\?.+?:(.*)\)$/
         pattern = pattern.to_s.sub(regex_options_pattern, '\1') if pattern.is_a?(Regexp) && pattern.to_s =~ regex_options_pattern
-        InfixExpression.new('matches', self, "'#{pattern.to_s}'")
+        InfixExpression.new('matches', self, "'#{pattern.to_s}'", :type => :boolean)
       end
     
       def neg
@@ -74,6 +80,28 @@ module Piglet
       
       def escape(str)
         str.gsub(/("|'|\\)/) { |m| "\\#{$1}" }
+      end
+      
+      def function_return_type(function_name, expression_type)
+        case function_name
+        when :avg, :sum
+          case expression_type
+          when :int, :long
+            :long
+          when :float, :double, :bytearray
+            :double
+          else
+            nil
+          end
+        when :count, :size
+          :long
+        when :max, :min
+          expression_type
+        when :tokenize
+          :bag
+        else
+          nil
+        end
       end
     end
   end

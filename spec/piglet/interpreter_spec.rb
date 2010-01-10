@@ -647,6 +647,86 @@ describe Piglet::Interpreter do
       relation3.schema.field_type(relation1.alias.to_sym).field_names.should eql([:a, :b])
       relation3.schema.field_type(relation2.alias.to_sym).field_names.should eql([:c, :d])
     end
+
+    it 'knows the schema of a relation projection' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [r.a] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_names.should eql([:a])
+      schema.field_type(:a).should eql(:float)
+    end
+    
+    it 'knows the schema of a relation projection containing a call to MAX' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [r.a.max] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_names.should eql([nil])
+      schema.field_type(0).should eql(:float)
+    end
+    
+    it 'knows the schema of a relation projection containing a call to COUNT' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [r.a.count] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_names.should eql([nil])
+      schema.field_type(0).should eql(:long)
+    end
+    
+    it 'knows the schema of a relation projection containing a field rename' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [r.a.count.as(:x)] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_names.should eql([:x])
+    end
+    
+    it 'knows the schema of a relation projection containing a literal string' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [literal('blipp')] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_type(0).should eql(:chararray)
+    end
+    
+    it 'knows the schema of a relation projection containing a literal integer' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [literal(4)] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_type(0).should eql(:int)
+    end
+    
+    it 'knows the schema of a relation projection containing a literal float' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.foreach { |r| [literal(3.14)] }
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_type(0).should eql(:float)
+    end
     
   end
 
