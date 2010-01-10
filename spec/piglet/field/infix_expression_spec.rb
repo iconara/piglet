@@ -23,7 +23,7 @@ describe InfixExpression do
       end
     end
     
-    context 'infered' do
+    context 'inferred' do
       it 'returns the type of the left expression if no other rules apply' do
         expr = InfixExpression.new('x', @expressions[:chararray], @expressions[:bytearray])
         expr.type.should == :chararray
