@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class PrefixExpression # :nodoc:
-      include Operators
+      include Field
     
       def initialize(operator, expression, space_between=true)
         @operator, @expression, @space_between = operator, expression, space_between

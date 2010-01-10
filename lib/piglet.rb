@@ -40,7 +40,7 @@ module Piglet # :nodoc:
     autoload :CallExpression, 'piglet/field/call_expression'
     autoload :InfixExpression, 'piglet/field/infix_expression'
     autoload :Literal, 'piglet/field/literal'
-    autoload :Operators, 'piglet/field/operators'
+    autoload :Field, 'piglet/field/field'
     autoload :PrefixExpression, 'piglet/field/prefix_expression'
     autoload :Reference, 'piglet/field/reference'
     autoload :Rename, 'piglet/field/rename'

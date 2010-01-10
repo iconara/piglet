@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class BinaryConditional
-      include Operators
+      include Field
       
       def initialize(test, if_true, if_false)
         @test, @if_true, @if_false = test, if_true, if_false

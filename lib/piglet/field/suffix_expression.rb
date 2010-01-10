@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class SuffixExpression # :nodoc:
-      include Operators
+      include Field
     
       def initialize(operator, expression)
         @operator, @expression = operator, expression

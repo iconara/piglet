@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class Literal
-      include Operators
+      include Field
     
       def initialize(obj)
         @obj = obj

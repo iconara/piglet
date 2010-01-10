@@ -1,6 +1,6 @@
 module Piglet
   module Field
-    module Operators # :nodoc:
+    module Field # :nodoc:
       SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
       FUNCTIONS = [:avg, :count, :diff, :max, :min, :size, :sum, :tokenize]
     

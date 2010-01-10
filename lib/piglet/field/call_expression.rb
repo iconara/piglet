@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class CallExpression # :nodoc:
-      include Operators
+      include Field
     
       def initialize(name, inner_expression, options=nil)
         options ||= {}

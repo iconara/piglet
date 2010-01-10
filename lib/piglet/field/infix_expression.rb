@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class InfixExpression # :nodoc:
-      include Operators
+      include Field
     
       def initialize(operator, left_expression, right_expression)
         @operator, @left_expression, @right_expression = operator, left_expression, right_expression

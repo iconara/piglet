@@ -1,7 +1,7 @@
 module Piglet
   module Field
     class Reference # :nodoc:
-      include Operators
+      include Field
     
       def initialize(name, relation=nil, options=nil)
         options ||= {}
