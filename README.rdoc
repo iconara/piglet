@@ -209,6 +209,21 @@ and then use them just as any other operator:
   
 nifty, huh?
 
+=== Types & schemas
+
+Piglet knows the schema of relations, so you can do something else that Pig lacks: introspection. This lets you do things like like this code, which counts the unique values of all fields in a relation:
+
+  relation = load('in', :schema => [:a, :b, :c])
+  relation.schema.field_names.each do |field|
+    grouped = relation.group(field)
+    counted = grouped.foreach { |r| [r[1].count] }
+    store(counted, "out-#{field}")
+  end
+  
+This feature obviously only works if you have specified a schema in the call to #load.
+
+There are currently many limitations to this feature, so use it with caution. Since the schema support isn't completely reliable Piglet does not enforce schemas, and it does not warn you if you try to access a field that doesn't exist. If it had, it would probably be more annoying and limiting than it would be worth.
+
 == Limitations
   
 The aim is to support most of Pig Latin, but currently there are some limitations.
