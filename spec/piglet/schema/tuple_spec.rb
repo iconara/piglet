@@ -97,5 +97,20 @@ describe Tuple do
       t3.field_names.should eql([:a, :b, :c, :b, :c, :d])
     end
   end
+
+  describe '#to_s' do
+    it 'returns the schema string for a simple untyped schema' do
+      Tuple.parse([:a, :b]).to_s.should eql('(a:bytearray, b:bytearray)')
+    end
+    
+    it 'returns the schema string for a simple typed schema' do
+      Tuple.parse([[:a, :chararray], [:b, :int]]).to_s.should eql('(a:chararray, b:int)')
+    end
+
+    it 'returns the schema string for a nested schema' do
+      description = [[:a, :tuple, [[:x, :int], [:y, :float]]], [:b, :bag, [[:w, :bytearray]]]]
+      Tuple.parse(description).to_s.should eql('(a:tuple (x:int, y:float), b:bag {w:bytearray})')
+    end
+  end
   
 end

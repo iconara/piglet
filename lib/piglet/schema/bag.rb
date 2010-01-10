@@ -12,6 +12,10 @@ module Piglet
       def field_type(name)
         @tuple.field_type(name)
       end
+      
+      def to_s
+        @tuple.to_s.sub(/^\((.*)\)$/, '{\1}')
+      end
     end
   end
 end

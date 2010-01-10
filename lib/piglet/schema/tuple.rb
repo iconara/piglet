@@ -81,6 +81,26 @@ module Piglet
       def field_type(field_name)
         @type_map[field_name]
       end
+
+      def to_s
+        field_declarations = @field_names.map do |field_name|
+          type = field_type(field_name)
+          type_str = case type
+          when Tuple
+            "tuple #{type}"
+          when Bag
+            "bag #{type}"
+          else
+            type.to_s
+          end
+          if field_name
+            "#{field_name}:#{type_str}"
+          else
+            type_str
+          end
+        end
+        "(#{field_declarations.join(', ')})"
+      end
     end
   end
 end
