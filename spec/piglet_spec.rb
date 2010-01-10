@@ -663,7 +663,7 @@ describe Piglet do
           throw :schema, relation2.schema
         end
       end
-      schema.field_type(0).should eql(:float)
+      schema.field_type(0).should eql(:double)
     end
     
   end

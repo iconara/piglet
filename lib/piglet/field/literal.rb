@@ -26,7 +26,7 @@ module Piglet
         when Integer
           :int
         when Numeric
-          :float
+          :double
         else
           :bytearray
         end
