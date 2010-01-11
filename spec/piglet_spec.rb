@@ -579,7 +579,9 @@ describe Piglet do
           throw :relations, [relation1, relation2, relation3]
         end
       end
-      relation3.schema.field_names.should eql([:group, relation1.alias.to_sym, relation2.alias.to_sym])
+      relation3.schema.field_names[0].should eql(:group)
+      relation3.schema.field_names.should include(relation1.alias.to_sym)
+      relation3.schema.field_names.should include(relation2.alias.to_sym)
       relation3.schema.field_type(relation1.alias.to_sym).should be_a(Piglet::Schema::Bag)
       relation3.schema.field_type(relation2.alias.to_sym).should be_a(Piglet::Schema::Bag)
       relation3.schema.field_type(relation1.alias.to_sym).field_names.should eql([:a, :b])
