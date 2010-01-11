@@ -17,7 +17,9 @@ module Piglet
       self
     end
     
-    def to_pig_latin
+    def to_pig_latin(&block)
+      interpret(&block) if block_given?
+      
       return '' if @stores.empty?
       
       handled_relations = Set.new

@@ -8,14 +8,18 @@ describe Piglet::Interpreter do
   end
 
   context 'basic usage' do
-    it 'interprets a block given to #new' do
+    it 'interprets a block given to #new so that a subsequent call to #to_pig_latin returns the Pig Latin code' do
       output = Piglet::Interpreter.new { store(load('some/path'), 'out') }
       output.to_pig_latin.should_not be_empty
     end
   
-    it 'interprets a block given to #interpret' do
+    it 'interprets a block given to #interpret so that a subsequent call to #to_pig_latin returns the Pig Latin code' do
       output = @interpreter.interpret { store(load('some/path'), 'out') }
       output.to_pig_latin.should_not be_empty
+    end
+    
+    it 'interprets a block given to #to_pig_latin and returns the Pig Latin code' do
+      @interpreter.to_pig_latin { store(load('some/path'), 'out') }.should_not be_empty
     end
 
     it 'does nothing with no commands' do
