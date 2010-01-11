@@ -45,9 +45,14 @@ will output
   
 or
 
-  Piglet::Interpreter.new { store(load('input'), 'output') }.to_pig_latin
+  puts Piglet::Interpreter.new { store(load('input'), 'output') }.to_pig_latin
   
-will print 
+or
+
+  @interpreter = Piglet::Interpreter.new
+  puts @interpreter.to_pig_latin { store(load('input'), 'output') }
+  
+will print
 
   relation_1 = LOAD 'input';
   STORE relation_1 INTO 'output';
@@ -97,7 +102,7 @@ In fact, a whole script can be written without using variables at all:
 
   store(load('input', :schema => [:x, :y, :z]).sample(3).group(:x))
   
-The relation operators are meant to be close to the Pig Latin syntax, but there are obvious limitations and tradeoffs, see the documentation for the Piglet::Relation mixin for syntax examples.
+The relation operators are meant to be close to the Pig Latin syntax, but there are obvious limitations and tradeoffs, see the documentation for the Piglet::Relation::Relation mixin for syntax examples.
 
 === <code>load</code>
 
@@ -112,6 +117,8 @@ But if you want types, then you need to pass an array of arrays, where the inner
   
 This is a bit inconvenient. I would like to use a hash, like this: <code>{:a => :chararray, :b => :long}</code>, but since the order of the keys isn't guaranteed in Ruby 1.8, it's not possible. I'm working on something better.
 
+If you need to specify tuples or bags in a schema you can use the special syntax <code>[:field_name, :tuple, [[:a, :int], [:b, :float]]]</code>, i.e. the field name, the field type (<code>:tuple</code> or <code>:bag</code>) and the schema of the tuple or bag. See “Types & schemas” below for more info.
+
 You can also specify a load function by passing the <code>:using</code> option:
 
   load('input', :using => :pig_storage)
@@ -124,6 +131,118 @@ Piglet knows to translate <code>:pig_storage</code> to <code>PigStorage</code>, 
 +store+ works similarily to +load+, but it takes a relation as its first argument, and the path to the output as second. It too takes the option <code>:using</code>, with the same values as +load+.
 
 +dump+, +describe+, +illustrate+ and +explain+ all take a relation as sole argument. +explain+ can be called without argument (see the Pig Latin manual for what +EXPLAIN+ without argument does).
+
+== +cross+, +distinct+, +limit+, +sample+, +union+
+
+These operators are the most straightforward in Piglet. To do the equivalent of
+
+  b = DISTINCT a;
+  
+you write
+
+  b = a.distinct
+  
+in Piglet. More examples:
+
+  a.cross(b) # => CROSS a, b
+  a.limit(4) # => LIMIT a 4
+  a.sample(0.1) # => SAMPLE a 0.1
+  a.union(b, c) # => UNION a, b, c
+
+you get the pattern.
+
+== +order+
+
++order+ works more or less like the operators above, with some extra features: to specify ascending or descending order you can pass an array with two elements instead of a field name -- the first element is the field name, the second <code>:asc</code> or <code>:desc</code>:
+
+  a.order(:x, [:y, :desc]) # => ORDER a BY x, y DESC
+
+== +group+
+
+In light of the above +group+ works exactly as you would expect: <code>a.group(:b)</code> becomes <code>GROUP a BY b</code>. You can specify which fields to group by either by passing them as separate arguments, or by passing an array as the first parameter. These statements are equivalent:
+
+  a.group(:x, :y)
+  a.group([:x, :y])
+  a.group(%w(x y))
+
+== +filter+
+
++filter+ works a little bit different from the operators discussed above. It takes a block in which you specify the arguments to the operator. The block receives a parameter which is the relation that the operation is performed on -- this may sound odd, but since operations can be chained in Piglet there are situations where you otherwise wouldn't have a reference to the relation, e.g. <code>a.limit(4).filter { |r| … }</code>.
+
+The thing that sets +filter+ apart from the operators above is it needs to support field expressions. For example the <code>x == 3</code> in <code>FILTER a BY x == 3</code>. Piglet supports simple field operators like <code>==</code> or <code>%</code> quite transparently, but more complex expressions can be less elegant, see ”Limitations” below. For example <code>a.filter { |r| r.x == 3 }</code> works fine, but <code>a.filter { |r| r.x != 3 }</code> doesn't (it has to do with how Ruby parses expressions, unfortunately). To do not equals you can either do <code>r.x.ne(3)</code> or <code>(r.x == 3).not</code>. See “Limitations” below for more info on field expressions.
+
+The way field expressions are done in Piglet is that you ask the relation (the object passed to the block) for a field, and then call methods on that object to build up an expression. Some Ruby operators can be used, but other operations are only available as methods, again, see “Limitations” below for a complete reference.
+
+  a.filter { |r| r.x == 3 }              # => FILTER a BY x == 3
+  a.filter { |r| (r.x > 4).or(r.y < 2) } # => FILTER a BY x > 4 OR r < 2
+
+== +foreach+
+
+<code>FOREACH … GENERATE</code> is probably the most complex operator in Pig Latin. Piglet tries its best to support most of it, but there are things that are still missing -- see “Limitations”. Most things should work without problems though. The operator in Piglet is called simply +foreach+, and just as +filter+ it takes a block, which receives the relation as a parameter.
+
+In contrast to +filter+, +foreach+ should return an array of field references and expressions. This array describes the schema of the new relation. The expressions used in +foreach+ are usually not the same as those used in +filter+, although all are of course available in both situations. In +foreach+ common operators to use are the aggregate functions (called “eval functions” in the Pig Latin manual) like +MAX+, +MIN+, +COUNT+, +SUM+, etc. In Piglet these are method calls on field objects. Let's look at an example (I like to use lots of whitespace and newlines for +foreach+ operations, because otherwise it gets very messy):
+
+  a.foreach do |r|
+    [
+      r.x.max,
+      r.y.min,
+      r.z.count,
+      r.w + r.q
+    ]
+  end
+  
+this would be translated into:
+
+  FOREACH a GENERATE
+    MAX(x),
+    MIN(y),
+    COUNT(z),
+    w + q;
+    
+pretty straight forward. What if you want to give the fields of the new relation proper names? In Pig Latin you would write <code>MAX(x) AS (x_max)</code>, and in Piglet you can write <code>r.x.max.as(:x_max)</code>. This is such a common thing to do that I'm thinking of adding some kind of feature that automatically adds <code>AS</code> clauses where appropriate, but it's not there yet.
+
++foreach+ is a very complex beast, and this is just an overview, so I'll just give you a few more examples that are not obvious:
+
+Literal values can be specified using +literal+:
+
+  a.foreach { |r| [literal('hello').as(:hello)] } # => FOREACH a GENERATE 'hello' AS hello
+  
+Binary conditionals, a.k.a. the ternary operator are supported through +test+ (unfortunately the Ruby ternary operator can't be overridden):
+
+  a.foreach { |r| [test(r.x == 3, r.y, r.z)] } # => FOREACH a GENERATE (x == 3 ? y : z)
+  
+The first argument to +test+ is the test expression, the second is the if-true expression and the third is the if-false expression.
+
+== +split+
+
+The syntax of +split+ shouldn't be surprising if you've read this far, but there's perhaps some details that aren't obvious. To split a relation into a number of parts you call +split+ on the relation and pass a block in which you specify the expressions describing each shard. Just as with +filter+ and +foreach+ the block receives the relation as an argument. +split+ returns an array containing the relation shards and you can use parallel assignment to make it look really nice:
+
+  b, c = a.split { |r| [r.x > 2, r.y == 3] } # => SPLIT a INTO b IF x > 2, c IF y == 3
+
+== +cogroup+ & +join+
+
+Thes two operators are the different ways to join relations in Pig Latin. They take the relations to join, and the keys to join them. In Piglet you specify the join expression using a hash: the keys are the relations, and the values are the fields on which to join:
+
+  a.join(b => :y, a => :x)    # => JOIN b BY x, a BY y
+  a.cogroup(b => :y, a => :x) # => COGROUP b BY x, a BY y
+  
+Notice that you have to specify the +a+ relation twice: you call the method on it, but you also have to pass it as a key to the join description. I'm working on an alternative syntax.
+
+If you're joining on more than one field, simply pass an array of field names:
+
+  a.join(b => [:y, :z], a => [:x, :w]) # => JOIN b BY (y, z), a BY (x, w)
+  
+I'm not absolutely sure that it is legal to join or cogroup on more than one field, the Pig Latin manual isn't entirely clear on this, but Piglet supports it for the time being.
+
+<code>COGROUP</code> lets you specify <code>INNER</code> and <code>OUTER</code> for join fields, and in Piglet you can do this by passing <code>:inner</code> or <code>:outer</code> as the last element in the array that is the value in the join description:
+
+  a.cogroup(b => [:y, :inner], a => [:z, :outer]) # => COGROUP b BY y INNER, a BY z OUTER
+
+== <code>:parallel</code>
+
+For some operators in Pig Latin you can specify the <code>PARALLEL</code> keyword to tell Pig how many reducers
+
+For the +cogroup+, +cross+, +distinct+, +group+, +join+ and +order+ you can pass  <code>:parallel => <em>n</em></code> as the last parameter to specify the amount of parallelism, e.g. <code>a.group(:x, :y, :z, :parallel => 5)</code>.
 
 === Putting it all together
 
@@ -194,9 +313,9 @@ But in Piglet it's as simple as looping over the names of the dimensions. You co
     sum_dimension(input, dimension)
   end
 
-You can even define your own relation operations if you want, just add them to Piglet::Relation:
+You can even define your own relation operations if you want, just add them to Piglet::Relation::Relation:
 
-  module Piglet::Relation
+  module Piglet::Relation::Relation
     # Returns a list of sampled relations for each given sample size
     def samples(*sizes)
       sizes.map { |s| sample(s) }
