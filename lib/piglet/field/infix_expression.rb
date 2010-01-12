@@ -2,6 +2,8 @@ module Piglet
   module Field
     class InfixExpression # :nodoc:
       include Field
+      
+      attr_reader :operator
     
       def initialize(operator, left_expression, right_expression, options=nil)
         options ||= {}

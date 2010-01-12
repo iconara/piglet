@@ -2,6 +2,8 @@ module Piglet
   module Field
     class PrefixExpression # :nodoc:
       include Field
+      
+      attr_reader :operator
     
       def initialize(operator, expression, space_between=true, options=nil)
         options ||= {}
@@ -10,7 +12,7 @@ module Piglet
       end
     
       def simple?
-        true
+        false
       end
     
       def to_s

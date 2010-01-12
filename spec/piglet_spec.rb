@@ -395,6 +395,13 @@ describe Piglet do
   end
 
   context 'field expressions' do
+    it 'parenthesizes expressions with different operators' do
+      output = @interpreter.to_pig_latin do
+        store(load('in').filter { |r| r.x.and(r.y.or(r.z)).and(r.w) }, 'out')
+      end
+      output.should include('x AND (y OR z) AND w')
+    end
+    
     it 'doesn\'t parenthesizes expressions with the same operator' do
       output = @interpreter.to_pig_latin do
         store(load('in').filter { |r| r.x.and(r.y.and(r.z)).and(r.w) }, 'out')
@@ -402,11 +409,25 @@ describe Piglet do
       output.should include('x AND y AND z AND w')
     end
 
-    it 'parenthesizes expressions with different operators' do
+    it 'doesn\'t parenthesize function calls' do
       output = @interpreter.to_pig_latin do
-        store(load('in').filter { |r| r.x.and(r.y.or(r.z)).and(r.w) }, 'out')
+        store(load('in').foreach { |r| [r.x.max + r.y.min] }, 'out')
       end
-      output.should include('x AND (y OR z) AND w')
+      output.should include('MAX(x) + MIN(y)')
+    end
+
+    it 'doesn\'t parenthesize a suffix expression followed by an infix expression' do
+      output = @interpreter.to_pig_latin do
+        store(load('in').foreach { |r| [r.x.null?.or(r.y)] }, 'out')
+      end
+      output.should include('x is null OR y')
+    end
+
+    it 'parenthesizes a prefix expression followed by an infix expression' do
+      output = @interpreter.to_pig_latin do
+        store(load('in').foreach { |r| [r.x.not.and(r.y)] }, 'out')
+      end
+      output.should include('(NOT x) AND y')
     end
   end
   
