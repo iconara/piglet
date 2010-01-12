@@ -4,7 +4,7 @@ module Piglet
       SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
       FUNCTIONS = [:avg, :count, :max, :min, :size, :sum, :tokenize]
 
-      attr_reader :name, :type
+      attr_reader :name, :type, :operator
     
       FUNCTIONS.each do |fun|
         define_method(fun) do

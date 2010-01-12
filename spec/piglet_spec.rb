@@ -393,6 +393,22 @@ describe Piglet do
       @interpreter.to_pig_latin.should match(/(\w+) = LOAD 'in';\n(\w+) = DISTINCT \1;\nSTORE \2 INTO 'out1';\nSTORE \2 INTO 'out2';/)
     end
   end
+
+  context 'field expressions' do
+    it 'doesn\'t parenthesizes expressions with the same operator' do
+      output = @interpreter.to_pig_latin do
+        store(load('in').filter { |r| r.x.and(r.y.and(r.z)).and(r.w) }, 'out')
+      end
+      output.should include('x AND y AND z AND w')
+    end
+
+    it 'parenthesizes expressions with different operators' do
+      output = @interpreter.to_pig_latin do
+        store(load('in').filter { |r| r.x.and(r.y.or(r.z)).and(r.w) }, 'out')
+      end
+      output.should include('x AND (y OR z) AND w')
+    end
+  end
   
   context 'long and complex scripts' do
     before do

@@ -75,8 +75,10 @@ describe Piglet::Field::Reference do
         @field1.send(op, @field2).to_s.should eql("field1 #{op} field2")
       end
 
-      it "supports #{op} on an expression" do
-        (@field1 + (@field1.send(op, @field2))).to_s.should eql("field1 + (field1 #{op} field2)")
+      if op != :+ # + is already covered in all other iterations, and it parenthesizes differently
+        it "supports #{op} on an expression" do
+          (@field1 + (@field1.send(op, @field2))).to_s.should eql("field1 + (field1 #{op} field2)")
+        end
       end
     end
     

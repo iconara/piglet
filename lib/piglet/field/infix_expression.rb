@@ -18,7 +18,18 @@ module Piglet
       end
     
       def to_s
-        "#{parenthesise(@left_expression)} #{@operator} #{parenthesise(@right_expression)}"
+        left  = @left_expression
+        right = @right_expression
+
+        if left.respond_to?(:operator) && left.operator != @operator
+          left = parenthesise(left)
+        end
+        
+        if right.respond_to?(:operator) && right.operator != @operator
+          right = parenthesise(right)
+        end
+        
+        "#{left} #{@operator} #{right}"
       end
       
     private
