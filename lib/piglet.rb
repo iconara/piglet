@@ -55,6 +55,7 @@ module Piglet # :nodoc:
   end
   
   module Udf
+    autoload :Define, 'piglet/udf/define'
     autoload :Register, 'piglet/udf/register'
   end
 end

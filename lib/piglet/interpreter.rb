@@ -101,6 +101,26 @@ module Piglet
       @top_level_statements << Udf::Register.new(path)
     end
     
+    # DEFINE
+    #
+    #   define('test', :function => 'com.example.Test')             # => DEFINE test com.example.Test
+    #   define('test', :command => 'test.rb')                       # => DEFINE test `test.rb`
+    #   define('test', :command => 'test.rb', :input => :stdin)     # => DEFINE test `test.rb` INPUT(stdin)
+    #   define('test', :command => 'test.rb', :input => 'path/x')   # => DEFINE test `test.rb` INPUT('path/x')
+    #   define('test', :command => 'test.rb', :output => :stdout)   # => DEFINE test `test.rb` OUTPUT(stdout)
+    #   define('test', :command => 'test.rb', :ship => 'a/b/c')     # => DEFINE test `test.rb` SHIP('a/b/c')
+    #   define('test', :command => 'test.rb', :cache => ['x', 'y']) # => DEFINE test `test.rb` CACHE('x', 'y')
+    #
+    # The <code>:input</code> and <code>:output</code> options can take pretty
+    # complicated definitions in addition to the examples above:
+    #
+    #   :input => {:from => :stdin, :using => :pig_storage}                  # => INPUT(stdin USING PigStorage)
+    #   :output => {:to => :stdout, :using => 'MySerializer'}                # => OUTPUT(stdout USING MySerializer)
+    #   :output => [{:to => :stdout, :using => 'MySerializer'}, 'some/path'] # => OUTPUT(stdout USING MySerializer, 'some/path')
+    def define(ali4s, options=nil)
+      @top_level_statements << Udf::Define.new(ali4s, options)
+    end
+    
     # Support for binary conditions, a.k.a. the ternary operator.
     #
     #   x.test(x.a > x.b, x.a, x.b) # => (a > b ? a : b)

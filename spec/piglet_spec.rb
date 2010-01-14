@@ -361,11 +361,90 @@ describe Piglet do
     end
   end
 
-  context 'UDF statements:' do    
+  context 'UDF statements:' do
+    describe 'DEFINE' do
+      it 'outputs a DEFINE with the correct alias and function name' do
+        output = @interpreter.to_pig_latin { define('plunk', :function => 'com.example.Plunk') }
+        output.should include('DEFINE plunk com.example.Plunk')
+      end
+      
+      it 'outputs a DEFINE with the correct alias and command string' do
+        output = @interpreter.to_pig_latin { define('plunk', :command => 'plunk.rb') }
+        output.should include('DEFINE plunk `plunk.rb`')
+      end
+
+      it 'outputs a DEFINE with an INPUT definition' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :input => :stdin)
+        end
+        output.should include('DEFINE plunk `plunk.rb` INPUT(stdin)')
+      end
+
+      it 'outputs a DEFINE with an OUTPUT definition' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :output => :stdout)
+        end
+        output.should include('DEFINE plunk `plunk.rb` OUTPUT(stdout)')
+      end
+
+      it 'outputs a DEFINE with a SHIP definition with one path' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :ship => 'path/to/somewhere')
+        end
+        output.should include('DEFINE plunk `plunk.rb` SHIP(\'path/to/somewhere\')')
+      end
+
+      it 'outputs a DEFINE with a SHIP definition with may paths' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :ship => ['path/to/somewhere', 'and/to/somewhere/else'])
+        end
+        output.should include('DEFINE plunk `plunk.rb` SHIP(\'path/to/somewhere\', \'and/to/somewhere/else\')')
+      end
+
+      it 'outputs a DEFINE with a CACHE definition with one path description' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :cache => '/input/data.gz#data.gz')
+        end
+        output.should include('DEFINE plunk `plunk.rb` CACHE(\'/input/data.gz#data.gz\')')
+      end
+
+      it 'outputs a DEFINE with a CACHE definition with may path descriptions' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :cache => ['/input/data.gz#data.gz', '/mydir/mydata.txt#mydata.txt'])
+        end
+        output.should include('DEFINE plunk `plunk.rb` CACHE(\'/input/data.gz#data.gz\', \'/mydir/mydata.txt#mydata.txt\')')
+      end
+
+      it 'outputs a DEFINE with with a somewhat complex INPUT definition' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', :input => {:from => 'some/path', :using => :pig_storage})
+        end
+        output.should include('DEFINE plunk `plunk.rb` INPUT(\'some/path\' USING PigStorage)')
+      end
+
+      it 'outputs a DEFINE with with really complex options' do
+        output = @interpreter.to_pig_latin do
+          define('plunk', :command => 'plunk.rb', 
+            :input => [
+              {:from => 'some/path', :using => :pig_storage},
+              {:from => :stdin, :using => 'HelloWorld(\'test\')'}
+            ],
+            :output => [
+              {:to => 'some/other/path', :using => :bin_storage},
+              {:to => :stdout, :using => 'SomeOtherMechanism()'}
+            ],
+            :ship => 'to/here',
+            :cache => ['first', 'second', 'third']
+          )
+        end
+        output.should include('DEFINE plunk `plunk.rb` INPUT(\'some/path\' USING PigStorage, stdin USING HelloWorld(\'test\')) OUTPUT(\'some/other/path\' USING BinStorage, stdout USING SomeOtherMechanism()) SHIP(\'to/here\') CACHE(\'first\', \'second\', \'third\')')
+      end
+    end
+    
     describe 'REGISTER' do
       it 'outputs a REGISTER statement with the path to the specified JAR' do
         output = @interpreter.to_pig_latin { register('path/to/lib.jar') }
-        output.should include('REGISTER path/to/lib.jar;')
+        output.should include('REGISTER path/to/lib.jar')
       end
     end
   end
