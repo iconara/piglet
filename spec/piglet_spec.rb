@@ -361,6 +361,15 @@ describe Piglet do
     end
   end
 
+  context 'UDF statements:' do    
+    describe 'REGISTER' do
+      it 'outputs a REGISTER statement with the path to the specified JAR' do
+        output = @interpreter.to_pig_latin { register('path/to/lib.jar') }
+        output.should include('REGISTER path/to/lib.jar;')
+      end
+    end
+  end
+
   context 'aliasing & multiple statements' do
     it 'aliases the loaded relation and uses the same alias in the STORE statement' do
       @interpreter.interpret { store(load('in'), 'out') }

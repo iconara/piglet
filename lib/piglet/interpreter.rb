@@ -4,7 +4,7 @@ require 'set'
 module Piglet
   class Interpreter
     def initialize(&block)
-      @stores = [ ]
+      @top_level_statements = [ ]
       
       interpret(&block) if block_given?
     end
@@ -20,18 +20,18 @@ module Piglet
     def to_pig_latin(&block)
       interpret(&block) if block_given?
       
-      return '' if @stores.empty?
+      return '' if @top_level_statements.empty?
       
       handled_relations = Set.new
       statements = [ ]
       
-      @stores.each do |store|
-        unless store.relation.nil?
-          assignments(store.relation, handled_relations).each do |assignment|
+      @top_level_statements.each do |top_level_statement|
+        if top_level_statement.respond_to?(:relation) && ! top_level_statement.relation.nil?
+          assignments(top_level_statement.relation, handled_relations).each do |assignment|
             statements << assignment
           end
         end
-        statements << store
+        statements << top_level_statement
       end
       
       statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
@@ -62,28 +62,28 @@ module Piglet
     #   store(x, 'some/path', :using => 'Xyz') # => STORE x INTO 'some/path' USING Xyz
     #   store(x, 'some/path', :using => :pig_storage) # => STORE x INTO 'some/path' USING PigStorage
     def store(relation, path, options={})
-      @stores << Inout::Store.new(relation, path, options)
+      @top_level_statements << Inout::Store.new(relation, path, options)
     end
   
     # DUMP
     #
     #   dump(x) # => DUMP x
     def dump(relation)
-      @stores << Inout::Dump.new(relation)
+      @top_level_statements << Inout::Dump.new(relation)
     end
   
     # ILLUSTRATE
     #
     #   illustrate(x) # => ILLUSTRATE x
     def illustrate(relation)
-      @stores << Inout::Illustrate.new(relation)
+      @top_level_statements << Inout::Illustrate.new(relation)
     end
   
     # DESCRIBE
     #
     #   describe(x) # => DESCRIBE x
     def describe(relation)
-      @stores << Inout::Describe.new(relation)
+      @top_level_statements << Inout::Describe.new(relation)
     end
   
     # EXPLAIN
@@ -91,7 +91,14 @@ module Piglet
     #   explain    # => EXPLAIN
     #   explain(x) # => EXPLAIN(x)
     def explain(relation=nil)
-      @stores << Inout::Explain.new(relation)
+      @top_level_statements << Inout::Explain.new(relation)
+    end
+    
+    # REGISTER
+    #
+    #   register 'path/to/lib.jar' # => REGISTER path/to/lib.jar
+    def register(path)
+      @top_level_statements << Udf::Register.new(path)
     end
     
     # Support for binary conditions, a.k.a. the ternary operator.

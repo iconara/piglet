@@ -53,4 +53,8 @@ module Piglet # :nodoc:
     
     class SchemaError < PigletError; end
   end
+  
+  module Udf
+    autoload :Register, 'piglet/udf/register'
+  end
 end
