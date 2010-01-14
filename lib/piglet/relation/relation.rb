@@ -120,15 +120,13 @@ module Piglet
   
       # STREAM
       #
-      #   x.stream(x, 'cut -f 3')                         # => STREAM x THROUGH `cut -f 3`
-      #   x.stream([x, y], 'cut -f 3')                    # => STREAM x, y THROUGH `cut -f 3`
-      #   x.stream(x, 'cut -f 3', :schema => [%w(a int)]) # => STREAM x THROUGH `cut -f 3` AS (a:int)
-      #
-      #--
-      #
-      # TODO: how to handle DEFINE'd commands?
-      def stream(relations, command, options={})
-        raise NotSupportedError
+      #   x.stream(:command => 'cut -f 3')       # => STREAM x THROUGH `cut -f 3`
+      #   x.stream(:cmd)                         # => STREAM x THROUGH cmd
+      #   x.stream(y, :command => 'cut -f 3')    # => STREAM x, y THROUGH `cut -f 3`
+      #   x.stream(:cmd, :schema => [%w(a int)]) # => STREAM x THROUGH cmd AS (a:int)
+      def stream(*args)
+        fields, options = split_at_options(args)
+        Stream.new(self, fields, options)
       end
   
       # UNION

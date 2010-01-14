@@ -359,6 +359,26 @@ describe Piglet do
         @interpreter.to_pig_latin.should match(/\w+ BY y OUTER/)
       end
     end
+    
+    describe 'STREAM' do
+      it 'output a STREAM statement with a command reference' do
+        output = @interpreter.to_pig_latin do
+          a = load('in')
+          b = a.stream(:swoosch)
+          store(b, 'out')
+        end
+        output.should match(/STREAM \w+ THROUGH swoosch/)
+      end
+
+      it 'output a STREAM statement with a command' do
+        output = @interpreter.to_pig_latin do
+          a = load('in')
+          b = a.stream(:command => 'swoosch')
+          store(b, 'out')
+        end
+        output.should match(/STREAM \w+ THROUGH `swoosch`/)
+      end
+    end
   end
 
   context 'UDF statements:' do
