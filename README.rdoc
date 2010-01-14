@@ -483,6 +483,10 @@ When you call +group+, +filter+ or any of the other methods that can be applied 
 
 As a side effect of using +store+ and the other output operators as the trigger for creating the needed relational operations any relations that are not ancestors of relations that are outputed will not be included in the Pig Latin output. On the other hand, they would be no-ops when run by Pig anyway.
 
+=== The output is not what I expected!
+
+Please contact me and give me the Piglet code and what you think the output should be. I'll try to either fix your Piglet code, or fix Piglet to do what you expect it to do.
+
 == Copyright
 
 © 2009-2010 Theo Hultberg / Iconara. See LICENSE for details.
