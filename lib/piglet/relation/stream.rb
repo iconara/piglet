@@ -7,10 +7,20 @@ module Piglet
         options ||= {}
         @sources = [source]
         args.each do |arg|
-          @sources << arg if arg.is_a?(Relation)
+          @sources << arg if arg.is_a?(Relation) || arg.is_a?(Array)
         end
         @command_reference = (args - @sources).first
+        @sources = @sources.flatten
         @command = options[:command]
+        @schema = options[:schema]
+      end
+      
+      def schema
+        if @schema
+          Piglet::Schema::Tuple.parse(@schema)
+        else
+          nil
+        end
       end
       
       def to_s
@@ -20,6 +30,9 @@ module Piglet
           str << " #{@command_reference}" 
         else
           str << " `#{@command}`"
+        end
+        if @schema
+          str << " AS #{schema}"
         end
         str
       end

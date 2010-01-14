@@ -361,7 +361,7 @@ describe Piglet do
     end
     
     describe 'STREAM' do
-      it 'output a STREAM statement with a command reference' do
+      it 'outputs a STREAM statement with a command reference' do
         output = @interpreter.to_pig_latin do
           a = load('in')
           b = a.stream(:swoosch)
@@ -370,13 +370,33 @@ describe Piglet do
         output.should match(/STREAM \w+ THROUGH swoosch/)
       end
 
-      it 'output a STREAM statement with a command' do
+      it 'outputs a STREAM statement with a command' do
         output = @interpreter.to_pig_latin do
           a = load('in')
           b = a.stream(:command => 'swoosch')
           store(b, 'out')
         end
         output.should match(/STREAM \w+ THROUGH `swoosch`/)
+      end
+
+      it 'outputs a STREAM statement with a schema' do
+        output = @interpreter.to_pig_latin do
+          a = load('in')
+          b = a.stream(:command => 'swoosch', :schema => [:a, :b])
+          store(b, 'out')
+        end
+        output.should match(/STREAM \w+ THROUGH `swoosch` AS \(a:bytearray, b:bytearray\)/)
+      end
+      
+      it 'outputs a STREAM statement with many relations' do
+        output = @interpreter.to_pig_latin do
+          x = load('in1')
+          y = load('in2')
+          z = load('in3')
+          w = x.stream([x, y], :plink)
+          store(w, 'out')
+        end
+        output.should match(/STREAM \w+, \w+, \w+ THROUGH plink/)
       end
     end
   end
@@ -811,6 +831,18 @@ describe Piglet do
         end
       end
       schema.field_type(0).should eql(:double)
+    end
+    
+    it 'knows the schema of a relation streamed through a command (if there\'s a schema)' do
+      schema = catch(:schema) do
+        @interpreter.interpret do
+          relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
+          relation2 = relation1.stream(:command => 'command', :schema => [[:x, :chararray]])
+          throw :schema, relation2.schema
+        end
+      end
+      schema.field_names.should eql([:x])
+      schema.field_type(:x).should eql(:chararray)
     end
     
   end
