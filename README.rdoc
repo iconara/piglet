@@ -213,6 +213,8 @@ Binary conditionals, a.k.a. the ternary operator are supported through +test+ (u
   
 The first argument to +test+ is the test expression, the second is the if-true expression and the third is the if-false expression.
 
+<code>FOREACH { … } GENERATE</code>, a.k.a. nested foreach or foreach-with-inner-bag is currently not supported. Nor is specifying the schema of the resulting relation, or +FLATTEN+ operations.
+
 == +split+
 
 The syntax of +split+ shouldn't be surprising if you've read this far, but there's perhaps some details that aren't obvious. To split a relation into a number of parts you call +split+ on the relation and pass a block in which you specify the expressions describing each shard. Just as with +filter+ and +foreach+ the block receives the relation as an argument. +split+ returns an array containing the relation shards and you can use parallel assignment to make it look really nice:
@@ -237,6 +239,37 @@ I'm not absolutely sure that it is legal to join or cogroup on more than one fie
 <code>COGROUP</code> lets you specify <code>INNER</code> and <code>OUTER</code> for join fields, and in Piglet you can do this by passing <code>:inner</code> or <code>:outer</code> as the last element in the array that is the value in the join description:
 
   a.cogroup(b => [:y, :inner], a => [:z, :outer]) # => COGROUP b BY y INNER, a BY z OUTER
+
+== +stream+, +define+ & +register+
+
+The +STREAM+ operator is supported through <code>stream</code>. You can either stream through a command, or through a command reference. 
+
+To stream through a command, use this syntax:
+
+  a.stream(:command => 'cut -f 3') # => STREAM a THROUGH `cut -f 3`
+
+to define a command and then stream a relation through that command, use this syntax:
+
+  define(:reverse, :command => 'reverse.rb') # => DEFINE reverse `reverse.rb`
+  a.stream(:reverse)                         # => STREAM a THROUGH reverse
+
+You can also use +define+ to define function references:
+
+  define(:hello, :function => 'com.example.Hello') # => DEFINE hello com.example.Hello
+
+If you need to register a JAR you can use +register+:
+
+  register('path/to/lib.jar') # => REGISTER path/to/lib.jar
+
+Streaming multiple relations is supported, just pass more relations as an array:
+
+  a.stream([b, c, d], :reverse) # => STREAM a, b, c THROUGH reverse
+
+And finally, this is how you specify the schema of the resulting relation:
+
+  a.stream(:reverse, :schema => [:x, :y]) # => STREAM a THROUGH reverse AS (x, y)
+
+the schema syntax is the same as for +load+, and you can read more about it under “Types & schemas” below.
 
 == <code>:parallel</code>
 
@@ -351,6 +384,7 @@ The following Pig operators are supported:
 
 * +COGROUP+
 * +CROSS+
+* +DEFINE+
 * +DESCRIBE+
 * +DISTINCT+
 * +DUMP+
@@ -363,32 +397,39 @@ The following Pig operators are supported:
 * +LIMIT+
 * +LOAD+
 * +ORDER+
+* +REGISTER+
 * +SAMPLE+
 * +SPLIT+
 * +STORE+
+* +STREAM+
 * +UNION+
- 
+
 The following are currently not supported (but will be soon):
 
-* +STREAM+
-* +DEFINE+
-* +DECLARE+
-* +REGISTER+
+* <code>FOREACH { … } GENERATE</code>
+* <code>%DECLARE</code>
+* <code>%DEFAULT</code>
 
 The file commands (+cd+, +cat+, etc.) will probably not be supported for the forseeable future.
 
-All the aggregate functions are supported:
+UDF:s are sort of supported. You can declare a UDF with +declare+ and you can use it in some situations by using a string, but some situations are trickier (like renaming the result of a UDF call in a <code>FOREACH … GENERATE</code> body).
+
+All the aggregate functions except two are supported:
 
 * +AVG+
 * +CONCAT+
 * +COUNT+
-* +DIFF+
 * +IsEmpty+
 * +MAX+
 * +MIN+
 * +SIZE+
 * +SUM+
 * +TOKENIZE+
+
+These are not supported yet:
+
+* +DIFF+
+* +FLATTEN+
   
 Piglet only supports most arithmetic and logic operators (see below) on fields -- but check the output and make sure that it's doing what you expect because some it's tricky to see where Piglet hijacks the operators and when it's Ruby that is running the show. I'm doing the best I can, but there are many things that can't be done, at least not in Ruby 1.8.
 
