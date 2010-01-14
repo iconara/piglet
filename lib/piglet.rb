@@ -1,6 +1,6 @@
 # :main: README.rdoc
 module Piglet # :nodoc:
-  VERSION = '0.2.3'
+  VERSION = '0.2.4'
   
   class PigletError < StandardError; end
   class NotSupportedError < PigletError; end
