@@ -14,6 +14,14 @@ The code above will be translated to the following Pig Latin:
 
 Piglet aims to look like Pig Latin while allowing for things like loops and control of flow that are missing from Pig. I started working on Piglet out of frustration that my Pig scripts started to be very repetitive. Pig lacks control of flow and mechanisms to apply the same set of operations on multiple relations. Piglet is my way of adding those features.
 
+== Installation
+
+If you have Gemcutter.org as a source, just do
+
+  gem install piglet
+
+there are no dependencies.
+
 == Usage
 
 It can be used either as a command line tool for translating a file of Piglet code into Pig Latin, or you can use it inline in a Ruby script:
