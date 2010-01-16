@@ -60,4 +60,10 @@ module Piglet # :nodoc:
     autoload :Define, 'piglet/udf/define'
     autoload :Register, 'piglet/udf/register'
   end
+  
+  module Param
+    autoload :Declare, 'piglet/param/declare'
+    autoload :Default, 'piglet/param/default'
+    autoload :ParameterStatement, 'piglet/param/parameter_statement'
+  end
 end

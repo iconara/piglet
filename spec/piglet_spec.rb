@@ -106,6 +106,37 @@ describe Piglet do
       end
     end
   end
+
+  context 'parameter declarations:' do
+    %w(declare default).each do |op|
+      describe "%#{op}" do
+        it "outputs a %#{op} statement" do
+          @interpreter.interpret { self.send(op, :my_var, 'my_value') }
+          @interpreter.to_pig_latin.should match(/%#{op} my_var 'my_value'/)
+        end
+      
+        it "outputs a %#{op} statement with single quotes escaped" do
+          @interpreter.interpret { self.send(op, :my_var, "my 'value'") }
+          @interpreter.to_pig_latin.should match(/%#{op} my_var 'my \\'value\\''/)
+        end
+
+        it "outputs a %#{op} statement with an numeric value unquoted" do
+          @interpreter.interpret { self.send(op, :my_var, 1) }
+          @interpreter.to_pig_latin.should match(/%#{op} my_var 1/)
+        end
+
+        it "outputs a %#{op} statement with an symbol value quoted" do
+          @interpreter.interpret { self.send(op, :my_var, :x) }
+          @interpreter.to_pig_latin.should match(/%#{op} my_var 'x'/)
+        end
+
+        it "outputs a %#{op} statement with the value quoted in backticks, if the option :backticks => true is passed" do
+          @interpreter.interpret { self.send(op, :my_var, 'cut -f 4', :backticks => true) }
+          @interpreter.to_pig_latin.should match(/%#{op} my_var `cut -f 4`/)
+        end
+      end
+    end
+  end
   
   context 'relation operators:' do
     describe 'GROUP' do

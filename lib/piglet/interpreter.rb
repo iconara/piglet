@@ -123,6 +123,24 @@ module Piglet
       @top_level_statements << Udf::Define.new(ali4s, options)
     end
     
+    # %declare
+    #
+    #   declare(:my_var, 'value')                  # => %declare my_var 'value'
+    #   declare('quote', "He said 'hello!'")       # => %declare quote 'He said \'hello!\''
+    #   declare('cmd', 'uniq', :backticks => true) # => %declare cmd `uniq`
+    def declare(name, value, options=nil)
+      @top_level_statements << Param::Declare.new(name, value, options)
+    end
+    
+    # %default
+    #
+    #   default(:my_var, 'value')                  # => %default my_var 'value'
+    #   default('quote', "He said 'hello!'")       # => %default quote 'He said \'hello!\''
+    #   default('cmd', 'uniq', :backticks => true) # => %default cmd `uniq`
+    def default(name, value, options=nil)
+      @top_level_statements << Param::Default.new(name, value, options)
+    end
+    
     # Support for binary conditions, a.k.a. the ternary operator.
     #
     #   x.test(x.a > x.b, x.a, x.b) # => (a > b ? a : b)

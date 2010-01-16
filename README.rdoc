@@ -285,6 +285,17 @@ For some operators in Pig Latin you can specify the <code>PARALLEL</code> keywor
 
 For the +cogroup+, +cross+, +distinct+, +group+, +join+ and +order+ you can pass  <code>:parallel => <em>n</em></code> as the last parameter to specify the amount of parallelism, e.g. <code>a.group(:x, :y, :z, :parallel => 5)</code>.
 
+== <code>%declare</code> & <code>%default</code>
+
+The <code>%declare</code> and <code>%default</code> preprocessor macros are available as +declare+ and +default+. Each take two parameters, a name and a value:
+
+  declare(:foo, 'bar')     # => %declare foo 'bar'
+  default('hello', :world) # => %default hello 'world'
+
+If you want to quote the value with backticks, pass <code>:backticks => true</code> as the third parameter:
+
+  default 'CMD', 'uniq', :backticks => true
+
 === Putting it all together
 
 Let's look at a more complex example:
@@ -412,15 +423,13 @@ The following Pig operators are supported:
 * +STREAM+
 * +UNION+
 
-The following are currently not supported (but will be soon):
+The following is currently not supported (but will be soon):
 
 * <code>FOREACH { … } GENERATE</code>
-* <code>%DECLARE</code>
-* <code>%DEFAULT</code>
 
 The file commands (+cd+, +cat+, etc.) will probably not be supported for the forseeable future.
 
-UDF:s are sort of supported. You can declare a UDF with +declare+ and you can use it in some situations by using a string, but some situations are trickier (like renaming the result of a UDF call in a <code>FOREACH … GENERATE</code> body).
+UDF:s are sort of supported. You can define a UDF with +define+ and you can use it in some situations by using a string, but some situations are trickier (like renaming the result of a UDF call in a <code>FOREACH … GENERATE</code> body).
 
 All the aggregate functions except two are supported:
 
