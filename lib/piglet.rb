@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # :main: README.rdoc
 module Piglet # :nodoc:
   VERSION = '0.2.4'

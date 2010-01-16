@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Piglet
   module Udf
     class Define

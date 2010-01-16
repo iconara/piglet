@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 gem 'rdoc', '>= 2.4.0'
 
 require 'rake/rdoctask'
