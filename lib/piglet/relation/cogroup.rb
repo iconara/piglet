@@ -33,7 +33,10 @@ module Piglet
             inout = fields.last.to_s.upcase
             fields = fields[0..-2]
           end
-          if fields.is_a?(Enumerable) && fields.size > 1
+          if fields.is_a?(Enumerable) && fields.size == 1
+            fields = fields.first
+          end
+          if fields.is_a?(Enumerable)
             str = "#{s.alias} BY (#{fields.join(', ')})"
           else
             str = "#{s.alias} BY #{fields}"
