@@ -512,6 +512,16 @@ describe Piglet do
         end
         output.should include('DEFINE plunk `plunk.rb` INPUT(\'some/path\' USING PigStorage, stdin USING HelloWorld(\'test\')) OUTPUT(\'some/other/path\' USING BinStorage, stdout USING SomeOtherMechanism()) SHIP(\'to/here\') CACHE(\'first\', \'second\', \'third\')')
       end
+      
+      it 'makes the defined UDF available as a method in the interpreter scope, so that it can be used in a FOREACH and it\'s result renamed using AS' do
+        output = @interpreter.to_pig_latin do
+          define('my_udf', :function => 'com.example.My')
+          a = load('in')
+          b = a.foreach { |r| [my_udf('foo', 3, 'hello \'world\'', r[0]).as(:bar)]}
+          store(b, 'out')
+        end
+        output.should match(/FOREACH \w+ GENERATE my_udf\('foo', 3, 'hello \\'world\\'', \$0\) AS bar/)
+      end
     end
     
     describe 'REGISTER' do

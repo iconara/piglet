@@ -265,6 +265,12 @@ You can also use +define+ to define function references:
 
   define(:hello, :function => 'com.example.Hello') # => DEFINE hello com.example.Hello
 
+When you define a UDF it becomes available as a method in the interpreter scope. This means that you can refer to it by name in, for example, a <code>FOREACH … GENERATE</code> statement:
+
+  define :awesome, :function => 'my.awesome.Function' # => DEFINE awesome my.awesome.Function
+  …
+  b = a.foreach { |r| [awesome(r[0]).as(:something_special)] } # => b = FOREACH a GENERATE awesome($0) AS something_special
+
 If you need to register a JAR you can use +register+:
 
   register('path/to/lib.jar') # => REGISTER path/to/lib.jar
@@ -428,8 +434,6 @@ The following is currently not supported (but will be soon):
 * <code>FOREACH { … } GENERATE</code>
 
 The file commands (+cd+, +cat+, etc.) will probably not be supported for the forseeable future.
-
-UDF:s are sort of supported. You can define a UDF with +define+ and you can use it in some situations by using a string, but some situations are trickier (like renaming the result of a UDF call in a <code>FOREACH … GENERATE</code> body).
 
 All the aggregate functions except two are supported:
 

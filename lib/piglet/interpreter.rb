@@ -121,6 +121,16 @@ module Piglet
     #   :output => [{:to => :stdout, :using => 'MySerializer'}, 'some/path'] # => OUTPUT(stdout USING MySerializer, 'some/path')
     def define(ali4s, options=nil)
       @top_level_statements << Udf::Define.new(ali4s, options)
+      unless respond_to?(ali4s)
+        def metaclass
+          class << self
+            return self
+          end
+        end
+        metaclass.send(:define_method, ali4s) do |*args|
+          Field::UdfExpression.new(ali4s, *args)
+        end
+      end
     end
     
     # %declare

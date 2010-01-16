@@ -47,6 +47,7 @@ module Piglet # :nodoc:
     autoload :Reference, 'piglet/field/reference'
     autoload :Rename, 'piglet/field/rename'
     autoload :SuffixExpression, 'piglet/field/suffix_expression'
+    autoload :UdfExpression, 'piglet/field/udf_expression'
   end
   
   module Schema
