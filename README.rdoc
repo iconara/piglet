@@ -384,6 +384,19 @@ and then use them just as any other operator:
 
   small, medium, large = input.samples(0.01, 0.1, 0.5)
   
+or what about an operator that returns the top _n_ items by some field:
+
+	module Piglet::Relation::Relation
+	  # Returns the top _n_ tuples from a relation, ordered by _field_
+	  def top(n, field)
+	    order([field, :desc]).limit(n)
+	  end
+	end
+	
+which can be used as
+
+  input.top(10, :score)
+
 nifty, huh?
 
 === Types & schemas
