@@ -32,7 +32,7 @@ describe Piglet::Interpreter do
   describe '#test' do
     it 'outputs a binary conditional' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [test(r.a == r.b, r.a, r.b)]})
+        dump(load('in').foreach { [test(self.a == self.b, self.a, self.b)]})
       end
       @interpreter.to_pig_latin.should include('(a == b ? a : b)')
     end
@@ -41,35 +41,35 @@ describe Piglet::Interpreter do
   describe '#literal' do
     it 'outputs a literal string' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [literal('hello').as(:world)]})
+        dump(load('in').foreach { [literal('hello').as(:world)]})
       end
       @interpreter.to_pig_latin.should include("'hello' AS world")
     end
     
     it 'outputs a literal integer' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [literal(3).as(:n)]})
+        dump(load('in').foreach { [literal(3).as(:n)]})
       end
       @interpreter.to_pig_latin.should include("3 AS n")
     end
     
     it 'outputs a literal float' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [literal(3.14).as(:pi)]})
+        dump(load('in').foreach { [literal(3.14).as(:pi)]})
       end
       @interpreter.to_pig_latin.should include("3.14 AS pi")
     end
     
     it 'outputs a literal string when passed an arbitrary object' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [literal(self).as(:interpreter)]})
+        dump(load('in').foreach { [literal(self).as(:interpreter)]})
       end
       @interpreter.to_pig_latin.should match(/'[^']+' AS interpreter/)
     end
     
     it 'escapes single quotes' do
       @interpreter.interpret do
-        dump(load('in').foreach { |r| [literal("hello 'world'").as(:str)]})
+        dump(load('in').foreach { [literal("hello 'world'").as(:str)]})
       end
       @interpreter.to_pig_latin.should include("'hello \\'world\\'' AS str")
     end

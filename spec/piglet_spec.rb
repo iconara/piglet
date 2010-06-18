@@ -243,49 +243,49 @@ describe Piglet do
 
     describe 'FOREACH … GENERATE' do
       it 'outputs a FOREACH … GENERATE statement' do
-        @interpreter.interpret { dump(load('in').foreach { |r| :a }) }
+        @interpreter.interpret { dump(load('in').foreach { :a }) }
         @interpreter.to_pig_latin.should match(/FOREACH \w+ GENERATE a/)
       end
       
       it 'outputs a FOREACH … GENERATE statement with a list of fields' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [:a, :b, :c] }) }
+        @interpreter.interpret { dump(load('in').foreach { [:a, :b, :c] }) }
         @interpreter.to_pig_latin.should match(/FOREACH \w+ GENERATE a, b, c/)
       end
       
       it 'outputs a FOREACH … GENERATE statement with fields resolved from the relation' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [r.a, r.b, r.c] }) }
+        @interpreter.interpret { dump(load('in').foreach { [a, b, c] }) }
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a, b, c/)
       end
       
       it 'outputs a FOREACH … GENERATE statement with fields resolved from the relation with positional syntax' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [r[0], r[1], r[2]] }) }
+        @interpreter.interpret { dump(load('in').foreach { [self[0], self[1], self[2]] }) }
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE \$0, \$1, \$2/)
       end
       
       it 'outputs a FOREACH … GENERATE statement with aggregate functions applied to the fields' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.max, r.b.min, r.c.avg] }) }
+        @interpreter.interpret { dump(load('in').foreach { [a.max, b.min, c.avg] }) }
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE MAX\(a\), MIN\(b\), AVG\(c\)/)
       end
       
       it 'outputs a FOREACH … GENERATE statement with fields that access inner fields' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.b, r.b.c, r.c.d] }) }
+        @interpreter.interpret { dump(load('in').foreach { [a.b, b.c, c.d] }) }
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b, b.c, c.d/)
       end
       
       it 'outputs a FOREACH … GENERATE statement that includes field aliasing' do
-        @interpreter.interpret { dump(load('in').foreach { |r| [r.a.b.as(:c), r.a.b.as(:d)] }) }
+        @interpreter.interpret { dump(load('in').foreach { [a.b.as(:c), a.b.as(:d)] }) }
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b AS c, a.b AS d/)
       end
     end
 
     describe 'FILTER' do
       it 'outputs a FILTER statement' do
-        @interpreter.interpret { dump(load('in').filter { |r| r.a == 3 }) }
+        @interpreter.interpret { dump(load('in').filter { a == 3 }) }
         @interpreter.to_pig_latin.should match(/FILTER \w+ BY a == 3/)
       end
 
       it 'outputs a FILTER statement with a complex test' do
-        @interpreter.interpret { dump(load('in').filter { |r| (r.a > r.b).and(r.c.ne(3)) }) }
+        @interpreter.interpret { dump(load('in').filter { (a > b).and(c.ne(3)) }) }
         @interpreter.to_pig_latin.should match(/FILTER \w+ BY \(a > b\) AND \(c != 3\)/)
       end
     end
@@ -293,11 +293,11 @@ describe Piglet do
     describe 'SPLIT' do
       it 'outputs a SPLIT statement' do
         @interpreter.interpret do
-          a, b = load('in').split { |r| [r.a >= 0, r.a < 0]}
+          a, b = load('in').split { [first >= 0, second < 0] }
           dump(a)
           dump(b)
         end
-        @interpreter.to_pig_latin.should match(/SPLIT \w+ INTO \w+ IF a >= 0, \w+ IF a < 0/)
+        @interpreter.to_pig_latin.should match(/SPLIT \w+ INTO \w+ IF first >= 0, \w+ IF second < 0/)
       end
     end
     
@@ -517,7 +517,7 @@ describe Piglet do
         output = @interpreter.to_pig_latin do
           define('my_udf', :function => 'com.example.My')
           a = load('in')
-          b = a.foreach { |r| [my_udf('foo', 3, 'hello \'world\'', r[0]).as(:bar)]}
+          b = a.foreach { [my_udf('foo', 3, 'hello \'world\'', self[0]).as(:bar)]}
           store(b, 'out')
         end
         output.should match(/FOREACH \w+ GENERATE my_udf\('foo', 3, 'hello \\'world\\'', \$0\) AS bar/)
@@ -568,35 +568,35 @@ describe Piglet do
   context 'field expressions' do
     it 'parenthesizes expressions with different operators' do
       output = @interpreter.to_pig_latin do
-        store(load('in').filter { |r| r.x.and(r.y.or(r.z)).and(r.w) }, 'out')
+        store(load('in').filter { self.x.and(self.y.or(self.z)).and(self.w) }, 'out')
       end
       output.should include('x AND (y OR z) AND w')
     end
     
     it 'doesn\'t parenthesizes expressions with the same operator' do
       output = @interpreter.to_pig_latin do
-        store(load('in').filter { |r| r.x.and(r.y.and(r.z)).and(r.w) }, 'out')
+        store(load('in').filter { self.x.and(self.y.and(self.z)).and(self.w) }, 'out')
       end
       output.should include('x AND y AND z AND w')
     end
 
     it 'doesn\'t parenthesize function calls' do
       output = @interpreter.to_pig_latin do
-        store(load('in').foreach { |r| [r.x.max + r.y.min] }, 'out')
+        store(load('in').foreach { [self.x.max + self.y.min] }, 'out')
       end
       output.should include('MAX(x) + MIN(y)')
     end
 
     it 'doesn\'t parenthesize a suffix expression followed by an infix expression' do
       output = @interpreter.to_pig_latin do
-        store(load('in').foreach { |r| [r.x.null?.or(r.y)] }, 'out')
+        store(load('in').foreach { [self.x.null?.or(self.y)] }, 'out')
       end
       output.should include('x is null OR y')
     end
 
     it 'parenthesizes a prefix expression followed by an infix expression' do
       output = @interpreter.to_pig_latin do
-        store(load('in').foreach { |r| [r.x.not.and(r.y)] }, 'out')
+        store(load('in').foreach { [self.x.not.and(self.y)] }, 'out')
       end
       output.should include('(NOT x) AND y')
     end
@@ -615,15 +615,15 @@ describe Piglet do
           [:click_thru, :int]
         ])
         %w(site size name).each do |dimension|
-          result = sessions.group(:ad_id, dimension).foreach do |r|
+          result = sessions.group(:ad_id, dimension).foreach do
             [
-              r[0].ad_id.as(:ad_id),
+              self[0].ad_id.as(:ad_id),
               literal(dimension).as(:dimension),
-              r[0].field(dimension).as(:value),
-              r[1].exposure.sum.as(:exposures),
-              r[1].impression.sum.as(:impressions),
-              r[1].engagement.sum.as(:engagements),
-              r[1].click_thru.sum.as(:click_thrus)
+              self[0].field(dimension).as(:value),
+              self[1].exposure.sum.as(:exposures),
+              self[1].impression.sum.as(:impressions),
+              self[1].engagement.sum.as(:engagements),
+              self[1].click_thru.sum.as(:click_thrus)
             ]
           end
           store(result, "report_metrics-#{dimension}")
@@ -800,7 +800,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [r.a] }
+          relation2 = relation1.foreach { [a] }
           throw :schema, relation2.schema
         end
       end
@@ -812,7 +812,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [r.a.max] }
+          relation2 = relation1.foreach { [a.max] }
           throw :schema, relation2.schema
         end
       end
@@ -824,7 +824,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [r.a.count] }
+          relation2 = relation1.foreach { [a.count] }
           throw :schema, relation2.schema
         end
       end
@@ -836,7 +836,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [r.a.count.as(:x)] }
+          relation2 = relation1.foreach { [a.count.as(:x)] }
           throw :schema, relation2.schema
         end
       end
@@ -847,7 +847,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [literal('blipp')] }
+          relation2 = relation1.foreach { [literal('blipp')] }
           throw :schema, relation2.schema
         end
       end
@@ -858,7 +858,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [literal(4)] }
+          relation2 = relation1.foreach { [literal(4)] }
           throw :schema, relation2.schema
         end
       end
@@ -869,7 +869,7 @@ describe Piglet do
       schema = catch(:schema) do
         @interpreter.interpret do
           relation1 = load('in1', :schema => [[:a, :float], [:b, :int]])
-          relation2 = relation1.foreach { |r| [literal(3.14)] }
+          relation2 = relation1.foreach { [literal(3.14)] }
           throw :schema, relation2.schema
         end
       end
