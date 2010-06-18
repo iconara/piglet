@@ -55,7 +55,7 @@ module Piglet
       #   x.filter { a == b }          # => FILTER x BY a == b
       #   x.filter { a > b && c == 3 } # => FILTER x BY a > b AND c == 3
       def filter(&block)
-        context = BlockContext.new(self)
+        context = BlockContext.new(self, @interpreter)
         Filter.new(self, @interpreter, context.instance_eval(&block))
       end
   
@@ -70,7 +70,7 @@ module Piglet
       #
       # TODO: FOREACH a { b GENERATE c }
       def foreach(&block)
-        context = BlockContext.new(self)
+        context = BlockContext.new(self, @interpreter)
         Foreach.new(self, @interpreter, context.instance_eval(&block))
       end
   
@@ -119,7 +119,7 @@ module Piglet
       #
       #   y, z = x.split { [a <= 3, b > 4] } # => SPLIT x INTO y IF a <= 3, z IF a > 4
       def split(&block)
-        context = BlockContext.new(self)
+        context = BlockContext.new(self, @interpreter)
         Split.new(self, @interpreter, context.instance_eval(&block)).shards
       end
   

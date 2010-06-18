@@ -3,8 +3,8 @@
 module Piglet
   module Relation
     class BlockContext
-      def initialize(relation)
-        @relation = relation
+      def initialize(relation, interpreter)
+        @relation, @interpreter = relation, interpreter
       end
       
       # Support for literals in FOREACH … GENERATE blocks.
@@ -28,7 +28,13 @@ module Piglet
       end
       
       def method_missing(name, *args)
-        @relation.method_missing(name, *args)
+        if args.size == 0
+          @relation.method_missing(name, *args)
+        elsif @interpreter.respond_to?(name)
+          @interpreter.send(name, *args)
+        else
+          super
+        end
       end
     end
   end
