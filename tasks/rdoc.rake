@@ -1,9 +1,7 @@
 # encoding: utf-8
 
-gem 'rdoc', '>= 2.4.0'
-
 require 'rake/rdoctask'
-require 'sdoc' rescue LoadError
+require 'sdoc'
 
 
 Rake::RDocTask.new do |rdoc|
