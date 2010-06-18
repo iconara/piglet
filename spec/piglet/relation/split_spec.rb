@@ -12,7 +12,9 @@ describe Piglet::Relation::Split do
     @relation.stub!(:alias).and_return('rel')
     @expr1.stub!(:to_s).and_return('expr1')
     @expr2.stub!(:to_s).and_return('expr2')
-    @split = Piglet::Relation::Split.new(@relation, [@expr1, @expr2])
+    @interpreter = mock('Interpreter')
+    @interpreter.stub(:next_relation_alias).and_return(3)
+    @split = Piglet::Relation::Split.new(@relation, @interpreter, [@expr1, @expr2])
   end
 
   describe '#to_s' do

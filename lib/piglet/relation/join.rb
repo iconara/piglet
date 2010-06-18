@@ -5,7 +5,8 @@ module Piglet
     class Join # :nodoc:
       include Relation
     
-      def initialize(relation, description)
+      def initialize(relation, interpreter, description)
+        @interpreter = interpreter
         @join_fields = Hash[*description.select { |k, v| k.is_a?(Relation) }.flatten]
         @sources = @join_fields.keys
         @using = description[:using]

@@ -5,7 +5,8 @@ module Piglet
     class Cogroup # :nodoc:
       include Relation
     
-      def initialize(relation, description)
+      def initialize(relation, interpreter, description)
+        @interpreter = interpreter
         @join_fields = description.reject { |k, v| ! (k.is_a?(Relation)) }
         @sources = @join_fields.keys
         @parallel = description[:parallel]

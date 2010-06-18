@@ -8,7 +8,7 @@ module Piglet
       # The name this relation will get in Pig Latin. Then name is generated when
       # the relation is outputed by the interpreter, and will be unique.
       def alias
-        @alias ||= Relation.next_alias
+        @alias ||= @interpreter.next_relation_alias
       end
   
       # GROUP
@@ -18,7 +18,7 @@ module Piglet
       #   x.group([:a, :b, :c], :parallel => 3) # => GROUP x BY (a, b, c) PARALLEL 3
       def group(*args)
         grouping, options = split_at_options(args)
-        Group.new(self, [grouping].flatten, options)
+        Group.new(self, @interpreter, [grouping].flatten, options)
       end
   
       # DISTINCT
@@ -26,7 +26,7 @@ module Piglet
       #   x.distinct                 # => DISTINCT x
       #   x.distinct(:parallel => 5) # => DISTINCT x PARALLEL 5
       def distinct(options={})
-        Distinct.new(self, options)
+        Distinct.new(self, @interpreter, options)
       end
 
       # COGROUP
@@ -37,7 +37,7 @@ module Piglet
       #   x.cogroup(x => :a, y => [:b, :inner])       # => COGROUP x BY a, y BY b INNER
       #   x.cogroup(x => :a, y => :b, :parallel => 5) # => COGROUP x BY a, y BY b PARALLEL 5
       def cogroup(description)
-        Cogroup.new(self, description)
+        Cogroup.new(self, @interpreter, description)
       end
   
       # CROSS
@@ -47,7 +47,7 @@ module Piglet
       #   x.cross([y, z], :parallel => 5) # => CROSS x, y, z, w PARALLEL 5
       def cross(*args)
         relations, options = split_at_options(args)
-        Cross.new(([self] + relations).flatten, options)
+        Cross.new(([self] + relations).flatten, @interpreter, options)
       end
   
       # FILTER
@@ -55,7 +55,7 @@ module Piglet
       #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
       #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
       def filter
-        Filter.new(self, yield(self))
+        Filter.new(self, @interpreter, yield(self))
       end
   
       # FOREACH ... GENERATE
@@ -69,7 +69,7 @@ module Piglet
       #
       # TODO: FOREACH a { b GENERATE c }
       def foreach
-        Foreach.new(self, yield(self))
+        Foreach.new(self, @interpreter, yield(self))
       end
   
       # JOIN
@@ -79,14 +79,14 @@ module Piglet
       #   x.join(x => :a, y => :b, :using => :replicated) # => JOIN x BY a, y BY b USING "replicated"
       #   x.join(x => :a, y => :b, :parallel => 5)        # => JOIN x BY a, y BY b PARALLEL 5
       def join(description)
-        Join.new(self, description)
+        Join.new(self, @interpreter, description)
       end
   
       # LIMIT
       #
       #   x.limit(10) # => LIMIT x 10
       def limit(n)
-        Limit.new(self, n)
+        Limit.new(self, @interpreter, n)
       end
   
       # ORDER
@@ -103,21 +103,21 @@ module Piglet
       def order(*args)
         fields, options = split_at_options(args)
         fields = *fields
-        Order.new(self, fields, options)
+        Order.new(self, @interpreter, fields, options)
       end
   
       # SAMPLE
       #
       #   x.sample(5) # => SAMPLE x 5;
       def sample(n)
-        Sample.new(self, n)
+        Sample.new(self, @interpreter, n)
       end
     
       # SPLIT
       #
       #   y, z = x.split { |r| [r.a <= 3, r.b > 4]} # => SPLIT x INTO y IF a <= 3, z IF a > 4
       def split
-        Split.new(self, yield(self)).shards
+        Split.new(self, @interpreter, yield(self)).shards
       end
   
       # STREAM
@@ -128,7 +128,7 @@ module Piglet
       #   x.stream(:cmd, :schema => [%w(a int)]) # => STREAM x THROUGH cmd AS (a:int)
       def stream(*args)
         fields, options = split_at_options(args)
-        Stream.new(self, fields, options)
+        Stream.new(self, @interpreter, fields, options)
       end
   
       # UNION
@@ -136,7 +136,7 @@ module Piglet
       #   x.union(y)    # => UNION x, y
       #   x.union(y, z) # => UNION x, y, z
       def union(*relations)
-        Union.new(*([self] + relations))
+        Union.new(([self] + relations).flatten, @interpreter)
       end
 
       def field(name)
@@ -182,12 +182,6 @@ module Piglet
         else
           [parameters, nil]
         end
-      end
-
-      def self.next_alias
-        @counter ||= 0
-        @counter += 1
-        "relation_#{@counter}"
       end
     end
   end

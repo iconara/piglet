@@ -6,8 +6,10 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe Piglet::Relation::Relation do
   
   before do
-    @relation = Object.new
-    @relation.extend Piglet::Relation::Relation
+    @interpreter = double()
+    @interpreter.stub(:next_relation_alias).and_return(rand(10000))
+    @relation = PlainRelation.new(@interpreter)
+    @relation.extend(Piglet::Relation::Relation)
   end
   
   it 'has a alias' do
@@ -16,9 +18,10 @@ describe Piglet::Relation::Relation do
   
   it 'has a unique alias' do
     aliases = { }
+    interpreter = double()
+    interpreter.stub(:next_relation_alias).and_return(*(0..1000).to_a)
     1000.times do
-      @relation = Object.new
-      @relation.extend Piglet::Relation::Relation
+      @relation = PlainRelation.new(interpreter)
       aliases.should_not have_key(@relation.alias)
       aliases[@relation.alias] = @relation
     end

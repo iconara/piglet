@@ -5,8 +5,8 @@ module Piglet
     class Filter # :nodoc:
       include Relation
     
-      def initialize(relation, expression)
-        @sources, @expression = [relation], expression
+      def initialize(relation, interpreter, expression)
+        @sources, @interpreter, @expression = [relation], interpreter, expression
       end
     
       def to_s

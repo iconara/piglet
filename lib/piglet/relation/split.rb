@@ -5,8 +5,8 @@ module Piglet
     class Split # :nodoc:
       include Relation
     
-      def initialize(relation, expressions)
-        @sources, @expressions = [relation], expressions
+      def initialize(relation, interpreter, expressions)
+        @sources, @interpreter, @expressions = [relation], interpreter, expressions
         @shard_map = create_shards
       end
     
@@ -26,7 +26,7 @@ module Piglet
   
       def create_shards
         @expressions.inject({}) do |map, expr|
-          map[expr] = RelationShard.new(self)
+          map[expr] = RelationShard.new(self, @interpreter)
           map
         end
       end
@@ -35,8 +35,8 @@ module Piglet
     class RelationShard # :nodoc:
       include Relation
     
-      def initialize(split)
-        @sources = [split]
+      def initialize(split, interpreter)
+        @sources, @interpreter = [split], interpreter
       end
     
       def to_s

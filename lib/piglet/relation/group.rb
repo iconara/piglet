@@ -5,9 +5,9 @@ module Piglet
     class Group # :nodoc:
       include Relation
     
-      def initialize(relation, grouping, options={})
+      def initialize(relation, interpreter, grouping, options={})
         options ||= {}
-        @sources, @grouping, @parallel = [relation], grouping, options[:parallel]
+        @sources, @interpreter, @grouping, @parallel = [relation], interpreter, grouping, options[:parallel]
       end
       
       def schema
