@@ -52,10 +52,11 @@ module Piglet
   
       # FILTER
       #
-      #   x.filter { |r| r.a == r.b }            # => FILTER x BY a == b
-      #   x.filter { |r| r.a > r.b && r.c != 3 } # => FILTER x BY a > b AND c != 3
-      def filter
-        Filter.new(self, @interpreter, yield(self))
+      #   x.filter { a == b }          # => FILTER x BY a == b
+      #   x.filter { a > b && c == 3 } # => FILTER x BY a > b AND c == 3
+      def filter(&block)
+        context = BlockContext.new(self, @interpreter)
+        Filter.new(self, @interpreter, context.instance_eval(&block))
       end
   
       # FOREACH ... GENERATE
@@ -68,8 +69,9 @@ module Piglet
       #--
       #
       # TODO: FOREACH a { b GENERATE c }
-      def foreach
-        Foreach.new(self, @interpreter, yield(self))
+      def foreach(&block)
+        context = BlockContext.new(self, @interpreter)
+        Foreach.new(self, @interpreter, context.instance_eval(&block))
       end
   
       # JOIN
@@ -115,9 +117,10 @@ module Piglet
     
       # SPLIT
       #
-      #   y, z = x.split { |r| [r.a <= 3, r.b > 4]} # => SPLIT x INTO y IF a <= 3, z IF a > 4
-      def split
-        Split.new(self, @interpreter, yield(self)).shards
+      #   y, z = x.split { [a <= 3, b > 4] } # => SPLIT x INTO y IF a <= 3, z IF a > 4
+      def split(&block)
+        context = BlockContext.new(self, @interpreter)
+        Split.new(self, @interpreter, context.instance_eval(&block)).shards
       end
   
       # STREAM

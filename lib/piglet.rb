@@ -21,6 +21,7 @@ module Piglet # :nodoc:
   end
   
   module Relation
+    autoload :BlockContext, 'piglet/relation/block_context'
     autoload :Cogroup, 'piglet/relation/cogroup'
     autoload :Cross, 'piglet/relation/cross'
     autoload :Distinct, 'piglet/relation/distinct'

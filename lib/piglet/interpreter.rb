@@ -157,22 +157,6 @@ module Piglet
       @top_level_statements << Param::Default.new(name, value, options)
     end
     
-    # Support for binary conditions, a.k.a. the ternary operator.
-    #
-    #   x.test(x.a > x.b, x.a, x.b) # => (a > b ? a : b)
-    # 
-    # Should only be used in the block given to #filter and #foreach
-    def test(test, if_true, if_false)
-      Field::BinaryConditional.new(test, if_true, if_false)
-    end
-    
-    # Support for literals in FOREACH … GENERATE blocks.
-    #
-    #   x.foreach { |r| [literal("hello").as(:hello)] } # => FOREACH x GENERATE 'hello' AS hello
-    def literal(obj)
-      Field::Literal.new(obj)
-    end
-    
   private
   
     def assignments(relation, ignore_set)
