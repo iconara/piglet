@@ -6,13 +6,11 @@ require File.expand_path(File.dirname(__FILE__) + '/../../spec_helper')
 describe Piglet::Relation::Union do
 
   before do
-    @relation1 = Object.new
-    @relation1.extend Piglet::Relation::Relation
-    @relation2 = mock('relation2')
-    @relation3 = mock('relation3')
-    @relation1.stub!(:alias).and_return('relation1')
-    @relation2.stub!(:alias).and_return('relation2')
-    @relation3.stub!(:alias).and_return('relation3')
+    @interpreter = stub()
+    @interpreter.stub(:next_relation_alias).and_return('relation1', 'relation2', 'relation3')
+    @relation1 = PlainRelation.new(@interpreter)
+    @relation2 = PlainRelation.new(@interpreter)
+    @relation3 = PlainRelation.new(@interpreter)
   end
 
   describe '#to_s' do    

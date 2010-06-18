@@ -5,7 +5,8 @@ module Piglet
     class Stream # :nodoc:
       include Relation
       
-      def initialize(source, args, options=nil)
+      def initialize(source, interpreter, args, options=nil)
+        @interpreter = interpreter
         options ||= {}
         @sources = [source]
         args.each do |arg|

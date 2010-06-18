@@ -5,8 +5,8 @@ module Piglet
     class Foreach # :nodoc:
       include Relation
     
-      def initialize(relation, field_expressions)
-        @sources, @field_expressions = [relation], [field_expressions].flatten
+      def initialize(relation, interpreter, field_expressions)
+        @sources, @interpreter, @field_expressions = [relation], interpreter, [field_expressions].flatten
       end
       
       def schema

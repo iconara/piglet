@@ -6,9 +6,9 @@ module Piglet
       include Piglet::Relation::Relation
       include StorageTypes
     
-      def initialize(path, options={})
+      def initialize(path, interpreter, options={})
         options ||= {}
-        @path, @using, @schema = path, options[:using], options[:schema]
+        @path, @interpreter, @using, @schema = path, interpreter, options[:using], options[:schema]
       end
     
       def schema

@@ -5,8 +5,8 @@ module Piglet
     class Limit # :nodoc:
       include Relation
     
-      def initialize(relation, n)
-        @sources, @n = [relation], n
+      def initialize(relation, interpreter, n)
+        @sources, @interpreter, @n = [relation], interpreter, n
       end
     
       def to_s

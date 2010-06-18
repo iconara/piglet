@@ -5,8 +5,8 @@ module Piglet
     class Union # :nodoc:
       include Relation
     
-      def initialize(*relations)
-        @sources = [relations].flatten
+      def initialize(relations, interpreter)
+        @sources, @interpreter = relations, interpreter
       end
     
       def to_s

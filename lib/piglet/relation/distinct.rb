@@ -5,9 +5,9 @@ module Piglet
     class Distinct # :nodoc:
       include Relation
     
-      def initialize(relation, options={})
+      def initialize(relation, interpreter, options={})
         options ||= {}
-        @sources, @parallel = [relation], options[:parallel]
+        @sources, @interpreter, @parallel = [relation], interpreter, options[:parallel]
       end
     
       def to_s

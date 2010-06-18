@@ -5,9 +5,9 @@ module Piglet
     class Cross # :nodoc:
       include Relation
     
-      def initialize(relations, options={})
+      def initialize(relations, interpreter, options={})
         options ||= {}
-        @sources, @parallel = relations, options[:parallel]
+        @sources, @interpreter, @parallel = relations, interpreter, options[:parallel]
       end
     
       def schema

@@ -38,7 +38,13 @@ module Piglet
       
       statements.flatten.map { |s| s.to_s }.join(";\n") + ";\n"
     end
-  
+    
+    def next_relation_alias
+      @counter ||= 0
+      @counter += 1
+      "relation_#{@counter}"
+    end
+
   protected
 
     # LOAD
@@ -55,7 +61,7 @@ module Piglet
     # NOTE: the syntax load('path', :schema => {:a => :chararray, :b => :int})
     # would be nice, but the order of the keys can't be guaranteed in Ruby 1.8.
     def load(path, options={})
-      Inout::Load.new(path, options)
+      Inout::Load.new(path, self, options)
     end
   
     # STORE
@@ -166,7 +172,7 @@ module Piglet
     def literal(obj)
       Field::Literal.new(obj)
     end
-  
+    
   private
   
     def assignments(relation, ignore_set)

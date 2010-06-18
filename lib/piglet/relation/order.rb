@@ -5,8 +5,9 @@ module Piglet
     class Order # :nodoc:
       include Relation
     
-      def initialize(relation, fields, options)
+      def initialize(relation, interpreter, fields, options)
         options ||= {}
+        @interpreter = interpreter
         @sources, @parallel = [relation], options[:parallel]
         @fields = fields.is_a?(Enumerable) ? fields : [fields]
       end
