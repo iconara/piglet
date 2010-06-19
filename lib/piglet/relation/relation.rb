@@ -61,10 +61,10 @@ module Piglet
   
       # FOREACH ... GENERATE
       #
-      #   x.foreach { |r| r.a }            # => FOREACH x GENERATE a
-      #   x.foreach { |r| [r.a, r.b] }     # => FOREACH x GENERATE a, b
-      #   x.foreach { |r| r.a.max }        # => FOREACH x GENERATE MAX(a)
-      #   x.foreach { |r| r.a.avg.as(:b) } # => FOREACH x GENERATE AVG(a) AS b
+      #   x.foreach { a }            # => FOREACH x GENERATE a
+      #   x.foreach { [a, b] }       # => FOREACH x GENERATE a, b
+      #   x.foreach { a.max }        # => FOREACH x GENERATE MAX(a)
+      #   x.foreach { a.avg.as(:b) } # => FOREACH x GENERATE AVG(a) AS b
       #
       #--
       #
