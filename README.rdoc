@@ -71,7 +71,7 @@ to standard out.
 
   a = load 'input', :schema => [:a, :b, :c]
   b = a.group :c
-  c = b.foreach { |r| [r[0], r[1].a.max, r[1].b.max] }
+  c = b.foreach { [self[0], self[1].a.max, self[1].b.max] }
   store c, 'output'
 
 will result in the following Pig Latin:
@@ -175,27 +175,29 @@ In light of the above +group+ works exactly as you would expect: <code>a.group(:
 
 == +filter+
 
-+filter+ works a little bit different from the operators discussed above. It takes a block in which you specify the arguments to the operator. The block receives a parameter which is the relation that the operation is performed on -- this may sound odd, but since operations can be chained in Piglet there are situations where you otherwise wouldn't have a reference to the relation, e.g. <code>a.limit(4).filter { |r| … }</code>.
++filter+ works a little bit different from the operators discussed above. It takes a block in which you specify the arguments to the operator. The block is interpreted in the context of the relation it's performed on.
 
-The thing that sets +filter+ apart from the operators above is it needs to support field expressions. For example the <code>x == 3</code> in <code>FILTER a BY x == 3</code>. Piglet supports simple field operators like <code>==</code> or <code>%</code> quite transparently, but more complex expressions can be less elegant, see ”Limitations” below. For example <code>a.filter { |r| r.x == 3 }</code> works fine, but <code>a.filter { |r| r.x != 3 }</code> doesn't (it has to do with how Ruby parses expressions, unfortunately). To do not equals you can either do <code>r.x.ne(3)</code> or <code>(r.x == 3).not</code>. See “Limitations” below for more info on field expressions.
+The thing that sets +filter+ apart from the operators above is it needs to support field expressions. For example the <code>x == 3</code> in <code>FILTER a BY x == 3</code>. Piglet supports simple field operators like <code>==</code> or <code>%</code> quite transparently, but more complex expressions can be less elegant, see ”Limitations” below. For example <code>a.filter { x == 3 }</code> works fine, but <code>a.filter { x != 3 }</code> doesn't (it has to do with how Ruby parses expressions, unfortunately). To do not equals you can either do <code>x.ne(3)</code> or <code>(x == 3).not</code>. See “Limitations” below for more info on field expressions.
 
-The way field expressions are done in Piglet is that you ask the relation (the object passed to the block) for a field, and then call methods on that object to build up an expression. Some Ruby operators can be used, but other operations are only available as methods, again, see “Limitations” below for a complete reference.
+The way field expressions are done in Piglet is that you simply use fields as if they were existing local variables, and then call methods on those to build up an expression. Some Ruby operators can be used, but other operations are only available as methods, again, see “Limitations” below for a complete reference.
 
-  a.filter { |r| r.x == 3 }              # => FILTER a BY x == 3
-  a.filter { |r| (r.x > 4).or(r.y < 2) } # => FILTER a BY x > 4 OR r < 2
+  a.filter { x == 3 }            # => FILTER a BY x == 3
+  a.filter { (x > 4).or(y < 2) } # => FILTER a BY x > 4 OR r < 2
+
+Be careful about the names of the fields. Ruby's scoping rules apply, which means that if there's already a variable defined outside of the block with the name +x+ Ruby will assume you meant that variable. If you get strange results, try prefixing with +self+, e.g. +self.x+.
 
 == +foreach+
 
-<code>FOREACH … GENERATE</code> is probably the most complex operator in Pig Latin. Piglet tries its best to support most of it, but there are things that are still missing -- see “Limitations”. Most things should work without problems though. The operator in Piglet is called simply +foreach+, and just as +filter+ it takes a block, which receives the relation as a parameter.
+<code>FOREACH … GENERATE</code> is probably the most complex operator in Pig Latin. Piglet tries its best to support most of it, but there are things that are still missing -- see “Limitations”. Most things should work without problems though. The operator in Piglet is called simply +foreach+, and just as +filter+ it takes a block, which is interpreted in the context of the relation +foreach+ was called on.
 
 In contrast to +filter+, +foreach+ should return an array of field references and expressions. This array describes the schema of the new relation. The expressions used in +foreach+ are usually not the same as those used in +filter+, although all are of course available in both situations. In +foreach+ common operators to use are the aggregate functions (called “eval functions” in the Pig Latin manual) like +MAX+, +MIN+, +COUNT+, +SUM+, etc. In Piglet these are method calls on field objects. Let's look at an example (I like to use lots of whitespace and newlines for +foreach+ operations, because otherwise it gets very messy):
 
-  a.foreach do |r|
+  a.foreach do
     [
-      r.x.max,
-      r.y.min,
-      r.z.count,
-      r.w + r.q
+      x.max,
+      y.min,
+      z.count,
+      w + q
     ]
   end
   
@@ -207,17 +209,21 @@ this would be translated into:
     COUNT(z),
     w + q;
     
-pretty straight forward. What if you want to give the fields of the new relation proper names? In Pig Latin you would write <code>MAX(x) AS (x_max)</code>, and in Piglet you can write <code>r.x.max.as(:x_max)</code>. This is such a common thing to do that I'm thinking of adding some kind of feature that automatically adds <code>AS</code> clauses where appropriate, but it's not there yet.
+pretty straight forward. What if you want to give the fields of the new relation proper names? In Pig Latin you would write <code>MAX(x) AS (x_max)</code>, and in Piglet you can write <code>x.max.as(:x_max)</code>. This is such a common thing to do that I'm thinking of adding some kind of feature that automatically adds <code>AS</code> clauses where appropriate, but it's not there yet.
+
+If you want to access fields with $0, $1, etc. you can use +self[0]+, +self[1]+:
+
+  a.foreach { [self[0].as(:x)] } # => FOREACH a GENERATE $0
 
 +foreach+ is a very complex beast, and this is just an overview, so I'll just give you a few more examples that are not obvious:
 
 Literal values can be specified using +literal+:
 
-  a.foreach { |r| [literal('hello').as(:hello)] } # => FOREACH a GENERATE 'hello' AS hello
+  a.foreach { [literal('hello').as(:hello)] } # => FOREACH a GENERATE 'hello' AS hello
   
 Binary conditionals, a.k.a. the ternary operator are supported through +test+ (unfortunately the Ruby ternary operator can't be overridden):
 
-  a.foreach { |r| [test(r.x == 3, r.y, r.z)] } # => FOREACH a GENERATE (x == 3 ? y : z)
+  a.foreach { [test(x == 3, y, z)] } # => FOREACH a GENERATE (x == 3 ? y : z)
   
 The first argument to +test+ is the test expression, the second is the if-true expression and the third is the if-false expression.
 
@@ -225,9 +231,9 @@ The first argument to +test+ is the test expression, the second is the if-true e
 
 == +split+
 
-The syntax of +split+ shouldn't be surprising if you've read this far, but there's perhaps some details that aren't obvious. To split a relation into a number of parts you call +split+ on the relation and pass a block in which you specify the expressions describing each shard. Just as with +filter+ and +foreach+ the block receives the relation as an argument. +split+ returns an array containing the relation shards and you can use parallel assignment to make it look really nice:
+The syntax of +split+ shouldn't be surprising if you've read this far, but there's perhaps some details that aren't obvious. To split a relation into a number of parts you call +split+ on the relation and pass a block in which you specify the expressions describing each shard. Just as with +filter+ and +foreach+ the block operates in the context of the relation +split+ is called on. +split+ returns an array containing the relation shards and you can use parallel assignment to make it look really nice:
 
-  b, c = a.split { |r| [r.x > 2, r.y == 3] } # => SPLIT a INTO b IF x > 2, c IF y == 3
+  b, c = a.split { [x > 2, y == 3] } # => SPLIT a INTO b IF x > 2, c IF y == 3
 
 == +cogroup+ & +join+
 
@@ -269,7 +275,7 @@ When you define a UDF it becomes available as a method in the interpreter scope.
 
   define :awesome, :function => 'my.awesome.Function' # => DEFINE awesome my.awesome.Function
   …
-  b = a.foreach { |r| [awesome(r[0]).as(:something_special)] } # => b = FOREACH a GENERATE awesome($0) AS something_special
+  b = a.foreach { [awesome(self[0]).as(:something_special)] } # => b = FOREACH a GENERATE awesome($0) AS something_special
 
 If you need to register a JAR you can use +register+:
 
@@ -307,10 +313,10 @@ If you want to quote the value with backticks, pass <code>:backticks => true</co
 Let's look at a more complex example:
 
   students = load('students.txt', :schema => [%w(student chararray), %w(age int), %w(grade int)])
-  top_acheivers = students.filter { |r| r.grade == 5 }
-  name_and_age = top_acheivers.foreach { |r| [r.student.as(:name), r.age] }
+  top_acheivers = students.filter { grade == 5 }
+  name_and_age = top_acheivers.foreach { [student.as(:name), age] }
   name_by_age = name_and_age.group(:age)
-  count_by_age = name_by_age.foreach { |r| [r[0].as(:age), r[1].name.count.as(:count)]}
+  count_by_age = name_by_age.foreach { [self[0].as(:age), r[1].name.count.as(:count)]}
   store(count_by_age, 'student_counts_by_age.txt', :using => :pig_storage)
 
 We load the file <code>students.txt</code> as a relation with three fields: <code>student</code>, a string, <code>age</code> an integer and <code>grade</code> another integer. Next we filter out the top acheivers with +filter+. +filter+ takes a block and that block gets a referece to the relation (the one +filter+ was called on), the result of the block will be the filter expression, in this case it's <code>grade == 5</code>.
@@ -338,8 +344,8 @@ My goal with Piglet was to add control of flow and reuse mechanisms to Pig, so I
 
   input = load('input', :schema => %w(country browser site visit_duration))
   %w(country browser site).each do |dimension|
-    grouped = input.group(dimension).foreach do |r|
-      [r[0], r[1].visit_duration.sum]
+    grouped = input.group(dimension).foreach do
+      [self[0], self[1].visit_duration.sum]
     end
     store(grouped, "output-#{dimension}")
   end
@@ -360,8 +366,8 @@ We load a file that contains an ID field, three dimensions (country, browser and
 But in Piglet it's as simple as looping over the names of the dimensions. You could even define a method that encapsulates the grouping, summing and storing (although in this case it would be a bit overkill):
 
   def sum_dimension(relation, dimension)
-    grouped = relation.group(dimension).foreach do |r|
-      [r[0], r[1].visit_duration.sum]
+    grouped = relation.group(dimension).foreach do
+      [self[0], self[1].visit_duration.sum]
     end
     store(grouped, "output-#{dimension}")
   end
@@ -406,7 +412,7 @@ Piglet knows the schema of relations, so you can do something else that Pig lack
   relation = load('in', :schema => [:a, :b, :c])
   relation.schema.field_names.each do |field|
     grouped = relation.group(field)
-    counted = grouped.foreach { |r| [r[1].count] }
+    counted = grouped.foreach { [self[1].count] }
     store(counted, "out-#{field}")
   end
   
