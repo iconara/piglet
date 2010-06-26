@@ -7,6 +7,7 @@ module Piglet
       
       def initialize(new_name, field_expression)
         @name, @field_expression, @type = new_name, field_expression, field_expression.type
+        @predecessors = [field_expression]
       end
       
       def to_s

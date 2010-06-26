@@ -73,6 +73,12 @@ module Piglet
         context = BlockContext.new(self, @interpreter)
         Foreach.new(self, @interpreter, context.instance_eval(&block))
       end
+      
+      # TODO doc
+      def nested_foreach(&block)
+        context = BlockContext.new(self, @interpreter)
+        NestedForeach.new(self, @interpreter, context.instance_eval(&block))
+      end
   
       # JOIN
       #

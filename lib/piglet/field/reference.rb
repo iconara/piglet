@@ -10,16 +10,13 @@ module Piglet
         @name, @parent = name, relation
         @explicit_ancestry = options[:explicit_ancestry] || false
         @type = options[:type]
+        @predecessors = [relation] unless relation.nil?
       end
     
       def simple?
         true
       end
-    
-      def field(name)
-        Reference.new(name, self, :explicit_ancestry => true)
-      end
-    
+
       def method_missing(name, *args)
         if name.to_s =~ /^\w+$/ && args.empty?
           field(name)
