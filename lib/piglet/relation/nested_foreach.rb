@@ -18,7 +18,8 @@ module Piglet
       
       def to_s
         str = "FOREACH #{@sources.first.alias} {\n"
-        str << block_expressions.map { |expression| TAB + "#{expression.alias} = #{expression.to_s};\n" }.join
+        str << block_expressions.map { |expression| TAB + "#{expression.field_alias} = #{expression.to_inner_s};\n" }.join
+        str << TAB + "GENERATE " + (@expressions.map { |expression| expression.field_alias}.join(",")) + ";\n"
         str << "}"
       end
       
@@ -32,10 +33,12 @@ module Piglet
       
       def intermediates(expression, handled)
         result = []
-        unless handled.member? expression or expression.predecessors.nil?
-          expression.predecessors.each { |predecessor| result += intermediates(predecessor, handled) }
-          result += [expression]
-          handled.add(expression)
+        unless handled.member? expression
+          if expression.is_a? Field::Field
+            expression.predecessors.each { |predecessor| result += intermediates(predecessor, handled) }
+            result += [expression]
+            handled.add(expression)
+          end
         end
         result
       end

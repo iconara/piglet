@@ -37,6 +37,10 @@ module Piglet
         "#{left} #{@operator} #{right}"
       end
       
+      def to_inner_s
+        "#{left.field_alias} #{@operator} #{right.field_alias}"
+      end
+      
     private
     
       def determine_type(left, right)

@@ -70,8 +70,16 @@ module Piglet
         end
       end
       
-      def alias
-        @alias ||= Field.next_alias
+      def field_alias
+        @field_alias ||= Field.next_alias
+      end
+      
+      def predecessors
+        @predecessors ||= []
+      end
+      
+      def distinct
+        DirectExpression.new("DISTINCT #{field_alias}", self)
       end
     
     protected

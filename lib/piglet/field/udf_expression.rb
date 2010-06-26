@@ -11,6 +11,10 @@ module Piglet
         "#{@alias}(#{args_to_s(@args)})"
       end
       
+      def to_s
+        "#{@alias}(#{args_to_inner_s(@args)})"
+      end
+      
     private
       
       def args_to_s(arg)
@@ -21,6 +25,17 @@ module Piglet
           arg.map { |a| args_to_s(a) }.join(', ')
         else
           arg
+        end
+      end
+      
+      def args_to_inner_s(arg)
+        case arg
+        when String
+          "'#{escape(arg)}'"
+        when Enumerable
+          arg.map { |a| args_to_inner_s(a) }.join(", ")
+        else
+          arg.field_alias
         end
       end
     end

@@ -25,6 +25,14 @@ module Piglet
           "#{@operator}#{parenthesise(@expression)}"
         end
       end
+      
+      def to_inner_s
+        if @space_between
+          "#{@operator} #{parenthesise(@expression.field_alias)}"
+        else
+          "#{@operator}#{paranthesis(@expression.field_alias)}"
+        end
+      end
     end
   end
 end
