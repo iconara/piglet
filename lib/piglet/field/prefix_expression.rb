@@ -11,6 +11,7 @@ module Piglet
         options ||= {}
         @operator, @expression, @space_between = operator, expression, space_between
         @type = options[:type] || expression.type
+        @predecessors = [expression]
       end
     
       def simple?

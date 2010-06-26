@@ -9,6 +9,7 @@ module Piglet
         options ||= {}
         @function_name, @inner_expression = function_name, inner_expression
         @type = options[:type] || inner_expression.type
+        @predecessors = [inner_expression]
       end
       
       def simple?

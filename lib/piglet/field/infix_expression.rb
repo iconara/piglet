@@ -15,6 +15,7 @@ module Piglet
         else
           @type = determine_type(@left_expression, @right_expression)
         end
+        @predecessors = [left_expression, right_expression]
       end
     
       def simple?

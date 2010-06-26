@@ -9,6 +9,7 @@ module Piglet
         options ||= {}
         @operator, @expression = operator, expression
         @type = options[:type] || expression.type
+        @predecessors = [expression]
       end
     
       def simple?

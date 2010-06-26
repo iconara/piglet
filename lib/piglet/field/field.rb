@@ -6,7 +6,7 @@ module Piglet
       SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
       FUNCTIONS = [:avg, :count, :max, :min, :size, :sum, :tokenize]
 
-      attr_reader :name, :type
+      attr_reader :name, :type, :predecessors
     
       FUNCTIONS.each do |fun|
         define_method(fun) do
@@ -69,8 +69,23 @@ module Piglet
           InfixExpression.new(op.to_s, self, other, :type => symbolic_operator_return_type(op, self, other))
         end
       end
+      
+      def alias
+        @alias ||= Field.next_alias
+      end
     
     protected
+    
+      def field(name)
+        Reference.new(name, self, :explicit_ancestry => true)
+      end
+      
+      def self.next_alias
+        @@counter ||= 0
+        ali4s = "field_#{@@counter}"
+        @@counter += 1
+        ali4s
+      end
   
       def parenthesise(expr)
         if expr.respond_to?(:simple?) && ! expr.simple?
