@@ -40,6 +40,16 @@ module Piglet
           @name.to_s
         end
       end
+      
+      def to_inner_s
+        if @explicit_ancestry
+          if @parent.respond_to?(:alias)
+            "#{@parent.alias}.#{@name.to_s}"
+          else
+            "#{@parent.field_alias}.#{@name.to_s}"
+          end
+        end
+      end
     end
   end
 end

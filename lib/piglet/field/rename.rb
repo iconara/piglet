@@ -13,6 +13,10 @@ module Piglet
       def to_s
         "#{@field_expression} AS #{@name}"
       end
+      
+      def to_inner_s
+        "#{@field_expression.field_alias} AS #{@name}"
+      end
     end
   end
 end

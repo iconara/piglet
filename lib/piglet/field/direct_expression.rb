@@ -7,13 +7,17 @@ module Piglet
       
       attr_reader :expression
       
-      def initialize(expression, ali4s)
-        @expression, @alias = ali4s
-        @predecessors = [expression]
+      def initialize(expression, predecessor)
+        @expression = expression
+        @predecessors = [predecessor]
       end
       
       def to_s
         @expression
+      end
+      
+      def to_inner_s
+        @expression.field_alias
       end
       
       def method_missing(name, *args)

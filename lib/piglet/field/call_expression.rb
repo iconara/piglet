@@ -19,6 +19,10 @@ module Piglet
       def to_s
         "#{@function_name}(#{@inner_expression})"
       end
+      
+      def to_inner_s
+        "#{@function_name}(#{@inner_expression.field_alias})"
+      end
     end
   end
 end

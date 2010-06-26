@@ -19,6 +19,10 @@ module Piglet
       def to_s
         "#{parenthesise(@expression)} #{@operator}"
       end
+      
+      def to_inner_s
+        "#{paranthesise(@expression.field_alias)} #{@operator}"
+      end
     end
   end
 end
