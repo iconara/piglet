@@ -28,7 +28,6 @@ module Piglet
       end
       
       def method_missing(name, *args)
-        puts "BlockContext#method_missing(#{name},#{args})"
         if args.size == 0
           @relation.method_missing(name, *args)
         elsif @interpreter.respond_to?(name)
