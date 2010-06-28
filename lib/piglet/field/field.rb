@@ -81,6 +81,28 @@ module Piglet
       def distinct
         DirectExpression.new("DISTINCT #{field_alias}", self)
       end
+      
+      def limit(size)
+        DirectExpression.new("LIMIT #{field_alias} #{size}", self)
+      end
+      
+      def sample(rate)
+        DirectExpression.new("SAMPLE #{field_alias} #{rate}", self)
+      end
+      
+      def order(*args)
+        fields, options = split_at_options(args)
+        fields = *fields
+        expression = Relation::Order.new(self, @interpreter, fields, options).to_s
+        DirectExpression.new(expression, self)
+      end
+      
+      def filter(&block)
+        dummy_relation = DummyRelation.new(self.send(:alias))
+        context = Relation::BlockContext.new(dummy_relation, @interpreter)
+        expression = context.instance_eval(&block)
+        DirectExpression.new("FILTER #{field_alias} BY #{expression}", self)
+      end
     
     protected
     
@@ -154,6 +176,22 @@ module Piglet
           nil
         end
       end
-    end
+      
+      def split_at_options(parameters)
+        if parameters.last.is_a? Hash
+          [parameters[0..-2], parameters.last]
+        else
+          [parameters, nil]
+        end
+      end
+      
+      class DummyRelation
+        include Relation::Relation
+        attr_reader :alias        
+        def initialize(ali4s)
+          @alias = ali4s
+        end
+      end
+    end  
   end
 end
