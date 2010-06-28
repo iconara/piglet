@@ -48,6 +48,8 @@ module Piglet
           else
             "#{@parent.field_alias}.#{@name.to_s}"
           end
+        else
+          @name.to_s
         end
       end
     end

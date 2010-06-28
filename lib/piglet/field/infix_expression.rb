@@ -38,7 +38,7 @@ module Piglet
       end
       
       def to_inner_s
-        "#{left.field_alias} #{@operator} #{right.field_alias}"
+        "#{@left_expression.field_alias} #{@operator} #{@right_expression.field_alias}"
       end
       
     private
