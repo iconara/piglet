@@ -5,19 +5,19 @@ module Piglet
     class DirectExpression
       include Field
       
-      attr_reader :expression
+      attr_reader :string
       
-      def initialize(expression, predecessor)
-        @expression = expression
+      def initialize(string, predecessor)
+        @string = string
         @predecessors = [predecessor]
       end
       
       def to_s
-        @expression
+        @string
       end
       
       def to_inner_s
-        @expression.field_alias
+        to_s
       end
       
       def method_missing(name, *args)
