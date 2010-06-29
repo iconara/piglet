@@ -103,12 +103,12 @@ module Piglet
         expression = context.instance_eval(&block)
         DirectExpression.new("FILTER #{field_alias} BY #{expression}", self)
       end
-    
-    protected
-    
+      
       def field(name)
         Reference.new(name, self, :explicit_ancestry => true)
       end
+    
+    protected
       
       def self.next_alias
         @@counter ||= 0
