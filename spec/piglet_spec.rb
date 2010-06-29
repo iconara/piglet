@@ -294,16 +294,25 @@ describe Piglet do
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_7 = a;\s+field_8 = MAX\(field_7\);\s+field_9 = b;\s+field_10 = MIN\(field_9\);\s+field_11 = c;\s+field_12 = AVG\(field_11\);\s+GENERATE field_8,field_10,field_12;\s+\}/m)
       end
       
+      it 'outputs a FOREACH ... { ... GENERATE } statement with fields that access inner fields' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [a.b, b.c]}) }
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_13 = a;\s+field_14 = field_13.b;\s+field_15 = b;\s+field_16 = field_15.c;\s+GENERATE field_14,field_16;\s+\}/m)
+      end
+      
       it 'outputs a FOREACH ... { ... GENERATE } statement with user defined functions' do
         @interpreter.interpret do 
           define('my_udf', :function => 'com.example.My')
           dump(load('in').nested_foreach { [my_udf(a, 3, "hello")] })
         end
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_13 = a;\s+field_14 = my_udf\(field_13, 3, 'hello'\);\s+GENERATE field_14;\s+\}/)
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_17 = a;\s+field_18 = my_udf\(field_17, 3, 'hello'\);\s+GENERATE field_18;\s+\}/)
       end
       
-      it 'outputs a FOREACH ... { ... GENERATE } statement with fields that access inner fields' 
-      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' 
+      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [a.b.as(:c), a.b.as(:d)] }) }
+        puts @interpreter.to_pig_latin
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+GENERATE a.b AS c, a.b AS d/m)
+      end
+      
       it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods'
     end
 
