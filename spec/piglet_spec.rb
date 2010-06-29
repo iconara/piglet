@@ -307,13 +307,12 @@ describe Piglet do
         @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_17 = a;\s+field_18 = my_udf\(field_17, 3, 'hello'\);\s+GENERATE field_18;\s+\}/)
       end
       
-      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' do
-        @interpreter.interpret { dump(load('in').nested_foreach { [a.b.as(:c), a.b.as(:d)] }) }
-        puts @interpreter.to_pig_latin
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+GENERATE a.b AS c, a.b AS d/m)
+      it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [self[1].distinct.sample(0.3).limit(5).order(:x).filter { x == 5 }] }) }
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_19 = \$1;\s+field_20 = DISTINCT field_19;\s+field_21 = SAMPLE field_20 0.3;\s+field_22 = LIMIT field_21 5;\s+field_23 = ORDER field_22 BY x;\s+field_24 = FILTER field_23 BY x == 5;\s+GENERATE field_24;\s+\}/m)
       end
       
-      it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods'
+      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing'
     end
 
     describe 'FILTER' do
