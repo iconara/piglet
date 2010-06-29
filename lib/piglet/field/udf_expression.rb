@@ -5,6 +5,7 @@ module Piglet
       
       def initialize(ali4s, *args)
         @alias, @args = ali4s, args
+        @predecessors = args.select { |arg| arg.respond_to? :field_alias }
       end
       
       def to_s
@@ -29,13 +30,14 @@ module Piglet
       end
       
       def args_to_inner_s(arg)
-        case arg
-        when String
+        if arg.is_a? String
           "'#{escape(arg)}'"
-        when Enumerable
+        elsif arg.is_a? Enumerable
           arg.map { |a| args_to_inner_s(a) }.join(", ")
-        else
+        elsif arg.respond_to? :field_alias
           arg.field_alias
+        else
+          arg.to_s
         end
       end
     end

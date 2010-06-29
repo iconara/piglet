@@ -279,10 +279,29 @@ describe Piglet do
     end
     
     describe 'FOREACH ... { ... GENERATE }' do
-      it 'outputs a FOREACH ... { ... GENERATE } statement for named fields'      
-      it 'outputs a FOREACH ... { ... GENERATE } statement for positional fields'     
-      it 'outputs a FOREACH ... { ... GENERATE } statement with aggregate functions applied to fields' 
-      it 'outputs a FOREACH ... { ... GENERATE } statement with user defined functions'
+      it 'outputs a FOREACH ... { ... GENERATE } statement for named fields' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [a, b, c] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_1 = a;\s+field_2 = b;\s+field_3 = c;\s+GENERATE field_1,field_2,field_3;\s+\}/m)
+      end      
+      
+      it 'outputs a FOREACH ... { ... GENERATE } statement for positional fields' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [self[0], self[1], self[2]] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_4 = \$0\;\s+field_5 = \$1\;\s+field_6 = \$2\;\s+GENERATE field_4,field_5,field_6\;\s+\}/m)
+      end
+      
+      it 'outputs a FOREACH ... { ... GENERATE } statement with aggregate functions applied to fields' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [a.max, b.min, c.avg] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_7 = a;\s+field_8 = MAX\(field_7\);\s+field_9 = b;\s+field_10 = MIN\(field_9\);\s+field_11 = c;\s+field_12 = AVG\(field_11\);\s+GENERATE field_8,field_10,field_12;\s+\}/m)
+      end
+      
+      it 'outputs a FOREACH ... { ... GENERATE } statement with user defined functions' do
+        @interpreter.interpret do 
+          define('my_udf', :function => 'com.example.My')
+          dump(load('in').nested_foreach { [my_udf(a, 3, "hello")] })
+        end
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_13 = a;\s+field_14 = my_udf\(field_13, 3, 'hello'\);\s+GENERATE field_14;\s+\}/)
+      end
+      
       it 'outputs a FOREACH ... { ... GENERATE } statement with fields that access inner fields' 
       it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' 
       it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods'
