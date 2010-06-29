@@ -277,6 +277,16 @@ describe Piglet do
         @interpreter.to_pig_latin.should match(/FOREACH (\w+) GENERATE a.b AS c, a.b AS d/)
       end
     end
+    
+    describe 'FOREACH ... { ... GENERATE }' do
+      it 'outputs a FOREACH ... { ... GENERATE } statement for named fields'      
+      it 'outputs a FOREACH ... { ... GENERATE } statement for positional fields'     
+      it 'outputs a FOREACH ... { ... GENERATE } statement with aggregate functions applied to fields' 
+      it 'outputs a FOREACH ... { ... GENERATE } statement with user defined functions'
+      it 'outputs a FOREACH ... { ... GENERATE } statement with fields that access inner fields' 
+      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' 
+      it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods'
+    end
 
     describe 'FILTER' do
       it 'outputs a FILTER statement' do
