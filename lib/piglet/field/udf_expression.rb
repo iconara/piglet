@@ -11,7 +11,7 @@ module Piglet
         "#{@alias}(#{args_to_s(@args)})"
       end
       
-      def to_s
+      def to_inner_s
         "#{@alias}(#{args_to_inner_s(@args)})"
       end
       
