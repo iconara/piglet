@@ -16,14 +16,14 @@ module Piglet
       
       def to_s
         block_assignments = block_expressions.map do |expression|
-          "\t#{expression.field_alias} = #{expression.to_inner_s};\n"
+          "\t#{expression.field_alias} = #{expression.to_s(true)};\n"
         end
         
         generate_fields = @expressions.map do |expression| 
           if expression.respond_to?(:field_alias)
             expression.field_alias
           else
-            expression.to_inner_s
+            expression.to_s(true)
           end
         end
         

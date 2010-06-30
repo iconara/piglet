@@ -16,12 +16,12 @@ module Piglet
         false
       end
     
-      def to_s
-        "#{@function_name}(#{@inner_expression})"
-      end
-      
-      def to_inner_s
-        "#{@function_name}(#{@inner_expression.field_alias})"
+      def to_s(inner=false)
+        if inner
+          "#{@function_name}(#{@inner_expression.field_alias})"
+        else
+          "#{@function_name}(#{@inner_expression})"
+        end
       end
     end
   end

@@ -8,12 +8,12 @@ module Piglet
         @predecessors = args.select { |arg| arg.respond_to? :field_alias }
       end
       
-      def to_s
-        "#{@alias}(#{args_to_s(@args)})"
-      end
-      
-      def to_inner_s
-        "#{@alias}(#{args_to_inner_s(@args)})"
+      def to_s(inner=false)
+        if inner
+          "#{@alias}(#{args_to_inner_s(@args)})"
+        else
+          "#{@alias}(#{args_to_s(@args)})"
+        end
       end
       
     private

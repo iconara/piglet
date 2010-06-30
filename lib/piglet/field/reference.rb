@@ -29,24 +29,13 @@ module Piglet
         field("\$#{n}")
       end
     
-      def to_s
+      def to_s(inner=false)
         if @explicit_ancestry
           if @parent.respond_to?(:alias)
             "#{@parent.alias}.#{@name.to_s}"
           else
-            "#{@parent}.#{@name.to_s}"
-          end
-        else
-          @name.to_s
-        end
-      end
-      
-      def to_inner_s
-        if @explicit_ancestry
-          if @parent.respond_to?(:alias)
-            "#{@parent.alias}.#{@name.to_s}"
-          else
-            "#{@parent.field_alias}.#{@name.to_s}"
+            expr = if inner then @parent.field_alias else @parent end
+            "#{expr}.#{@name.to_s}"
           end
         else
           @name.to_s

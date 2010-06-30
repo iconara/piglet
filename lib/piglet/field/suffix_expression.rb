@@ -16,12 +16,9 @@ module Piglet
         false
       end
     
-      def to_s
-        "#{parenthesise(@expression)} #{@operator}"
-      end
-      
-      def to_inner_s
-        "#{paranthesise(@expression.field_alias)} #{@operator}"
+      def to_s(inner=false)
+        expr = if inner then @expression.field_alias else @expression end
+        "#{parenthesise(expr)} #{@operator}"
       end
     end
   end

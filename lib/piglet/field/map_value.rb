@@ -8,12 +8,9 @@ module Piglet
         @key, @predecessors = key, [parent]
       end
       
-      def to_s
-        "#{@predecessors.first}##{@key}"
-      end
-
-      def to_inner_s
-        "#{@predecessors.first.field_alias}##{@key}"
+      def to_s(inner=false)
+        expr = if inner then @predecessors.first.field_alias else @predecessors.first end
+        "#{expr}##{@key}"
       end
     end
   end
