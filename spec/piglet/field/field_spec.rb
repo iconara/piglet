@@ -9,8 +9,9 @@ include Piglet::Field
 describe Field do
 
   before do
-    @field = mock('field')
-    @field.extend Field
+    @field = Object.new
+    @field.extend(Field)
+    @field.stub(:predecessors).and_return([stub(:generate_field_alias => 'xyz')])
     @expressions = {}
     [:int, :long, :float, :double, :chararray, :bytearray, :bag, :tuple].each do |type|
       @expressions[type] = mock("#{type} expression")
@@ -19,7 +20,7 @@ describe Field do
     end
   end
   
-  it "should have an alias" do
+  it 'should have an alias' do
     @field.field_alias.should_not be_nil
   end
   

@@ -70,8 +70,16 @@ module Piglet
         end
       end
       
+      def generate_field_alias
+        if @parent.respond_to?(:next_field_alias)
+          @parent.next_field_alias
+        elsif predecessors.first.respond_to?(:generate_field_alias)
+          predecessors.first.generate_field_alias
+        end
+      end
+      
       def field_alias
-        @field_alias ||= Field.next_alias
+        @field_alias ||= generate_field_alias
       end
       
       def predecessors
@@ -118,13 +126,6 @@ module Piglet
     
     protected
       
-      def self.next_alias
-        @@counter ||= 0
-        ali4s = "field_#{@@counter}"
-        @@counter += 1
-        ali4s
-      end
-  
       def parenthesise(expr)
         if expr.respond_to?(:simple?) && ! expr.simple?
           "(#{expr})"
@@ -195,7 +196,7 @@ module Piglet
       
       class DummyRelation
         include Relation::Relation
-        attr_reader :alias        
+        attr_reader :alias
         def initialize(ali4s)
           @alias = ali4s
         end

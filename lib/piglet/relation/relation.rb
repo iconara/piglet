@@ -10,6 +10,12 @@ module Piglet
       def alias
         @alias ||= @interpreter.next_relation_alias
       end
+      
+      def next_field_alias
+        @field_counter ||= 0
+        @field_counter += 1
+        "#{self.alias}_field_#{@field_counter}"
+      end
   
       # GROUP
       #

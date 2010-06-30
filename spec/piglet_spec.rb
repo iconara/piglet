@@ -281,22 +281,22 @@ describe Piglet do
     describe 'FOREACH ... { ... GENERATE }' do
       it 'outputs a FOREACH ... { ... GENERATE } statement for named fields' do
         @interpreter.interpret { dump(load('in').nested_foreach { [a, b, c] }) }
-        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_1 = a;\s+field_2 = b;\s+field_3 = c;\s+GENERATE field_1, field_2, field_3;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = b;\s+(\w+) = c;\s+GENERATE \1, \2, \3;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement for positional fields' do
         @interpreter.interpret { dump(load('in').nested_foreach { [self[0], self[1], self[2]] }) }
-        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_4 = \$0\;\s+field_5 = \$1\;\s+field_6 = \$2\;\s+GENERATE field_4, field_5, field_6\;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = \$0\;\s+(\w+) = \$1\;\s+(\w+) = \$2\;\s+GENERATE \1, \2, \3\;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with aggregate functions applied to fields' do
         @interpreter.interpret { dump(load('in').nested_foreach { [a.max, b.min, c.avg] }) }
-        @interpreter.to_pig_latin.should match(/FOREACH (\w+) \{\s+field_7 = a;\s+field_8 = MAX\(field_7\);\s+field_9 = b;\s+field_10 = MIN\(field_9\);\s+field_11 = c;\s+field_12 = AVG\(field_11\);\s+GENERATE field_8, field_10, field_12;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = MAX\(\1\);\s+(\w+) = b;\s+(\w+) = MIN\(\3\);\s+(\w+) = c;\s+(\w+) = AVG\(\5\);\s+GENERATE \2, \4, \6;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with fields that access inner fields' do
         @interpreter.interpret { dump(load('in').nested_foreach { [a.b, b.c]}) }
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_13 = a;\s+field_14 = field_13.b;\s+field_15 = b;\s+field_16 = field_15.c;\s+GENERATE field_14, field_16;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = \1.b;\s+(\w+) = b;\s+(\w+) = \3.c;\s+GENERATE \2, \4;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with user defined functions' do
@@ -304,22 +304,22 @@ describe Piglet do
           define('my_udf', :function => 'com.example.My')
           dump(load('in').nested_foreach { [my_udf(a, 3, "hello")] })
         end
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_17 = a;\s+field_18 = my_udf\(field_17, 3, 'hello'\);\s+GENERATE field_18;\s+\}/)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = my_udf\(\1, 3, 'hello'\);\s+GENERATE \2;\s+\}/)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with bag methods' do
         @interpreter.interpret { dump(load('in').nested_foreach { [self[1].distinct.sample(0.3).limit(5).order(:x).filter { x == 5 }] }) }
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_19 = \$1;\s+field_20 = DISTINCT field_19;\s+field_21 = SAMPLE field_20 0.3;\s+field_22 = LIMIT field_21 5;\s+field_23 = ORDER field_22 BY x;\s+field_24 = FILTER field_23 BY x == 5;\s+GENERATE field_24;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = \$1;\s+(\w+) = DISTINCT \1;\s+(\w+) = SAMPLE \2 0.3;\s+(\w+) = LIMIT \3 5;\s+(\w+) = ORDER \4 BY x;\s+(\w+) = FILTER \5 BY x == 5;\s+GENERATE \6;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' do
         @interpreter.interpret { dump(load('in').nested_foreach { a = b.distinct; [a.as(:c)] }) }
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_25 = b;\s+field_26 = DISTINCT field_25;\s+GENERATE field_26 AS c;\s+\}/)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = b;\s+(\w+) = DISTINCT \1;\s+GENERATE \2 AS c;\s+\}/)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with flatten' do
         @interpreter.interpret { dump(load('in').nested_foreach { [a.flatten] }) }
-        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_27 = a;\s+field_28 = FLATTEN\(field_27\);\s+GENERATE field_28;\s+\}/m)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = FLATTEN\(\1\);\s+GENERATE \2;\s+\}/m)
       end
     end
 
