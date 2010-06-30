@@ -13,7 +13,7 @@ module Piglet
       end
     
       def to_s
-        target = @sources.first.respond_to? (:field_alias) ? @sources.first.field_alias : @sources.first.alias
+        target = @sources.first.respond_to?(:field_alias) ? @sources.first.field_alias : @sources.first.alias
         "ORDER #{target} BY #{field_strings}"
       end
     
