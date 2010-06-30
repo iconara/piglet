@@ -66,15 +66,17 @@ module Piglet
       #   x.foreach { a.max }        # => FOREACH x GENERATE MAX(a)
       #   x.foreach { a.avg.as(:b) } # => FOREACH x GENERATE AVG(a) AS b
       #
-      #--
-      #
-      # TODO: FOREACH a { b GENERATE c }
+      # See #nested_foreach for FOREACH ... { ... GENERATE }
       def foreach(&block)
         context = BlockContext.new(self, @interpreter)
         Foreach.new(self, @interpreter, context.instance_eval(&block))
       end
       
-      # TODO doc
+      # FOREACH ... { ... GENERATE }
+      #
+      #   x.nested_foreach { [a.distinct] } # => FOREACH x { a1 = DISTINCT a; GENERATE a1 }
+      #
+      # See #foreach for FOREACH ... GENERATE
       def nested_foreach(&block)
         context = BlockContext.new(self, @interpreter)
         NestedForeach.new(self, @interpreter, context.instance_eval(&block))
