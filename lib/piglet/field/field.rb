@@ -111,6 +111,10 @@ module Piglet
       def field(name)
         Reference.new(name, self, :explicit_ancestry => true)
       end
+      
+      def get(key)
+        MapValue.new(key, self)
+      end
     
     protected
       
