@@ -316,6 +316,11 @@ describe Piglet do
         @interpreter.interpret { dump(load('in').nested_foreach { a = b.distinct; [a.as(:c)] }) }
         @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_25 = b;\s+field_26 = DISTINCT field_25;\s+GENERATE field_26 AS c;\s+\}/)
       end
+      
+      it 'outputs a FOREACH ... { ... GENERATE } statement with flatten' do
+        @interpreter.interpret { dump(load('in').nested_foreach { [a.flatten] }) }
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_27 = a;\s+field_28 = FLATTEN\(field_27\);\s+GENERATE field_28;\s+\}/m)
+      end
     end
 
     describe 'FILTER' do
