@@ -46,6 +46,7 @@ module Piglet # :nodoc:
     autoload :DirectExpression, 'piglet/field/direct_expression'
     autoload :Literal, 'piglet/field/literal'
     autoload :Field, 'piglet/field/field'
+    autoload :MapValue, 'piglet/field/map_value'
     autoload :PrefixExpression, 'piglet/field/prefix_expression'
     autoload :Reference, 'piglet/field/reference'
     autoload :Rename, 'piglet/field/rename'
