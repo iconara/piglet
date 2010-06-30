@@ -3,14 +3,19 @@
 module Piglet
   module Field
     class Rename # :nodoc:
-      attr_reader :name, :type
+      attr_reader :name, :type, :predecessors
       
-      def initialize(new_name, field_expression)
-        @name, @field_expression, @type = new_name, field_expression, field_expression.type
+      def initialize(name, field_expression)
+        @name, @field_expression, @type = name, field_expression, field_expression.type
+        @predecessors = [field_expression]
       end
       
       def to_s
         "#{@field_expression} AS #{@name}"
+      end
+      
+      def to_inner_s
+        "#{@field_expression.field_alias} AS #{@name}"
       end
     end
   end

@@ -11,6 +11,7 @@ module Piglet
         options ||= {}
         @operator, @expression, @space_between = operator, expression, space_between
         @type = options[:type] || expression.type
+        @predecessors = [expression]
       end
     
       def simple?
@@ -22,6 +23,14 @@ module Piglet
           "#{@operator} #{parenthesise(@expression)}"
         else
           "#{@operator}#{parenthesise(@expression)}"
+        end
+      end
+      
+      def to_inner_s
+        if @space_between
+          "#{@operator} #{parenthesise(@expression.field_alias)}"
+        else
+          "#{@operator}#{paranthesis(@expression.field_alias)}"
         end
       end
     end

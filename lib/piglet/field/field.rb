@@ -6,7 +6,7 @@ module Piglet
       SYMBOLIC_OPERATORS = [:==, :>, :<, :>=, :<=, :%, :+, :-, :*, :/]
       FUNCTIONS = [:avg, :count, :max, :min, :size, :sum, :tokenize]
 
-      attr_reader :name, :type
+      attr_reader :name, :type, :predecessors
     
       FUNCTIONS.each do |fun|
         define_method(fun) do
@@ -69,8 +69,61 @@ module Piglet
           InfixExpression.new(op.to_s, self, other, :type => symbolic_operator_return_type(op, self, other))
         end
       end
+      
+      def field_alias
+        @field_alias ||= Field.next_alias
+      end
+      
+      def predecessors
+        @predecessors ||= []
+      end
+      
+      def distinct
+        DirectExpression.new("DISTINCT #{field_alias}", self)
+      end
+      
+      def limit(size)
+        DirectExpression.new("LIMIT #{field_alias} #{size}", self)
+      end
+      
+      def sample(rate)
+        DirectExpression.new("SAMPLE #{field_alias} #{rate}", self)
+      end
+      
+      def order(*args)
+        fields, options = split_at_options(args)
+        fields = *fields
+        expression = Relation::Order.new(self, @interpreter, fields, options).to_s
+        DirectExpression.new(expression, self)
+      end
+      
+      def filter(&block)
+        dummy_relation = DummyRelation.new(self.send(:alias))
+        context = Relation::BlockContext.new(dummy_relation, @interpreter)
+        expression = context.instance_eval(&block)
+        DirectExpression.new("FILTER #{field_alias} BY #{expression}", self)
+      end
+      
+      def flatten
+        DirectExpression.new("FLATTEN(#{field_alias})", self)
+      end
+      
+      def field(name)
+        Reference.new(name, self, :explicit_ancestry => true)
+      end
+      
+      def get(key)
+        MapValue.new(key, self)
+      end
     
     protected
+      
+      def self.next_alias
+        @@counter ||= 0
+        ali4s = "field_#{@@counter}"
+        @@counter += 1
+        ali4s
+      end
   
       def parenthesise(expr)
         if expr.respond_to?(:simple?) && ! expr.simple?
@@ -131,6 +184,22 @@ module Piglet
           nil
         end
       end
-    end
+      
+      def split_at_options(parameters)
+        if parameters.last.is_a? Hash
+          [parameters[0..-2], parameters.last]
+        else
+          [parameters, nil]
+        end
+      end
+      
+      class DummyRelation
+        include Relation::Relation
+        attr_reader :alias        
+        def initialize(ali4s)
+          @alias = ali4s
+        end
+      end
+    end  
   end
 end

@@ -9,6 +9,7 @@ module Piglet
         options ||= {}
         @function_name, @inner_expression = function_name, inner_expression
         @type = options[:type] || inner_expression.type
+        @predecessors = [inner_expression]
       end
       
       def simple?
@@ -17,6 +18,10 @@ module Piglet
     
       def to_s
         "#{@function_name}(#{@inner_expression})"
+      end
+      
+      def to_inner_s
+        "#{@function_name}(#{@inner_expression.field_alias})"
       end
     end
   end

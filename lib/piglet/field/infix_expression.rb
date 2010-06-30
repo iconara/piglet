@@ -15,6 +15,7 @@ module Piglet
         else
           @type = determine_type(@left_expression, @right_expression)
         end
+        @predecessors = [left_expression, right_expression]
       end
     
       def simple?
@@ -34,6 +35,10 @@ module Piglet
         end
         
         "#{left} #{@operator} #{right}"
+      end
+      
+      def to_inner_s
+        "#{@left_expression.field_alias} #{@operator} #{@right_expression.field_alias}"
       end
       
     private

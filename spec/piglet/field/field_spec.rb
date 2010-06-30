@@ -19,6 +19,10 @@ describe Field do
     end
   end
   
+  it "should have an alias" do
+    @field.field_alias.should_not be_nil
+  end
+  
   describe '#type' do
     [:==, :ne, :<, :>, :<=, :>=, :and, :or].each do |op|
       op_str = (op == :ne ? '!=' : op).to_s.upcase

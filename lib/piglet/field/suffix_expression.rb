@@ -9,6 +9,7 @@ module Piglet
         options ||= {}
         @operator, @expression = operator, expression
         @type = options[:type] || expression.type
+        @predecessors = [expression]
       end
     
       def simple?
@@ -17,6 +18,10 @@ module Piglet
     
       def to_s
         "#{parenthesise(@expression)} #{@operator}"
+      end
+      
+      def to_inner_s
+        "#{paranthesise(@expression.field_alias)} #{@operator}"
       end
     end
   end
