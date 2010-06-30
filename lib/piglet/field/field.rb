@@ -104,6 +104,10 @@ module Piglet
         DirectExpression.new("FILTER #{field_alias} BY #{expression}", self)
       end
       
+      def flatten
+        DirectExpression.new("FLATTEN(#{field_alias})", self)
+      end
+      
       def field(name)
         Reference.new(name, self, :explicit_ancestry => true)
       end
