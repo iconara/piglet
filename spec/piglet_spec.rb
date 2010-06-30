@@ -312,7 +312,10 @@ describe Piglet do
         @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_19 = \$1;\s+field_20 = DISTINCT field_19;\s+field_21 = SAMPLE field_20 0.3;\s+field_22 = LIMIT field_21 5;\s+field_23 = ORDER field_22 BY x;\s+field_24 = FILTER field_23 BY x == 5;\s+GENERATE field_24;\s+\}/m)
       end
       
-      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing'
+      it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' do
+        @interpreter.interpret { dump(load('in').nested_foreach { a = b.distinct; [a.as(:c)] }) }
+        @interpreter.to_pig_latin.should match (/FOREACH (\w+) \{\s+field_25 = b;\s+field_26 = DISTINCT field_25;\s+GENERATE field_26 AS c;\s+\}/)
+      end
     end
 
     describe 'FILTER' do
