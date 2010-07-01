@@ -18,11 +18,13 @@ module Piglet
         false
       end
     
-      def to_s
+      def to_s(inner=false)
+        expr = if inner then @expression.field_alias else @expression end
+        
         if @space_between
-          "#{@operator} #{parenthesise(@expression)}"
+          "#{@operator} #{parenthesise(expr)}"
         else
-          "#{@operator}#{parenthesise(@expression)}"
+          "#{@operator}#{parenthesise(expr)}"
         end
       end
       

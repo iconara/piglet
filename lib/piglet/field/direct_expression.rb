@@ -12,12 +12,8 @@ module Piglet
         @predecessors = [predecessor]
       end
       
-      def to_s
+      def to_s(inner=false)
         @string
-      end
-      
-      def to_inner_s
-        to_s
       end
       
       def method_missing(name, *args)

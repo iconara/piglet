@@ -10,8 +10,9 @@ module Piglet
         @predecessors = [field_expression]
       end
       
-      def to_s
-        "#{@field_expression} AS #{@name}"
+      def to_s(inner=false)
+        expr = if inner then @field_expression.field_alias else @field_expression end
+        "#{expr} AS #{@name}"
       end
       
       def to_inner_s

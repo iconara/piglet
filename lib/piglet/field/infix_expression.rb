@@ -22,18 +22,22 @@ module Piglet
         false
       end
     
-      def to_s
-        left  = @left_expression
-        right = @right_expression
+      def to_s(inner=false)
+        if inner
+          left  = @left_expression.field_alias
+          right = @right_expression.field_alias
+        else
+          left  = @left_expression
+          right = @right_expression
 
-        if left.respond_to?(:operator) && left.operator != @operator
-          left = parenthesise(left)
-        end
+          if left.respond_to?(:operator) && left.operator != @operator
+            left = parenthesise(left)
+          end
         
-        if right.respond_to?(:operator) && right.operator != @operator
-          right = parenthesise(right)
+          if right.respond_to?(:operator) && right.operator != @operator
+            right = parenthesise(right)
+          end
         end
-        
         "#{left} #{@operator} #{right}"
       end
       
