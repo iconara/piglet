@@ -227,7 +227,21 @@ Binary conditionals, a.k.a. the ternary operator are supported through +test+ (u
   
 The first argument to +test+ is the test expression, the second is the if-true expression and the third is the if-false expression.
 
-<code>FOREACH { … } GENERATE</code>, a.k.a. nested foreach or foreach-with-inner-bag is currently not supported. Nor is specifying the schema of the resulting relation, or +FLATTEN+ operations.
+== +nested_foreach+
+
+In Pig Latin you can use a different syntax if you have a relation with an inner bag, e.g:
+
+  x = FOREACH b {
+    S = FILTER a BY c == 'xyz';
+    GENERATE COUNT(s.z);
+  }
+  
+In Piglet you would write this as
+
+  x.nested_foreach {
+    s = a.filter { c == 'xyz' }
+    [s.z.count]
+  }
 
 == +split+
 
@@ -434,7 +448,7 @@ The following Pig operators are supported:
 * +DUMP+
 * +EXPLAIN+
 * +FILTER+
-* <code>FOREACH … GENERATE</code>
+* <code>FOREACH … GENERATE</code> (including <code>FOREACH { … GENERATE }</code>)
 * +GROUP+
 * +ILLUSTRATE+
 * +JOIN+
@@ -448,13 +462,9 @@ The following Pig operators are supported:
 * +STREAM+
 * +UNION+
 
-The following is currently not supported (but will be soon):
-
-* <code>FOREACH { … } GENERATE</code>
-
 The file commands (+cd+, +cat+, etc.) will probably not be supported for the forseeable future.
 
-All the aggregate functions except two are supported:
+All the aggregate functions except one are supported:
 
 * +AVG+
 * +CONCAT+
@@ -465,11 +475,9 @@ All the aggregate functions except two are supported:
 * +SIZE+
 * +SUM+
 * +TOKENIZE+
-
-These are not supported yet:
-
-* +DIFF+
 * +FLATTEN+
+
++DIFF+ is not supported yet.
   
 Piglet only supports most arithmetic and logic operators (see below) on fields -- but check the output and make sure that it's doing what you expect because some it's tricky to see where Piglet hijacks the operators and when it's Ruby that is running the show. I'm doing the best I can, but there are many things that can't be done, at least not in Ruby 1.8.
 
@@ -510,6 +518,10 @@ In the future I may add a way of manually suggesting relation aliases, so that t
 
 You may also wonder why the relation aliases aren't in consecutive order. The reason is that they get their names in the order they are evaluated, and the interpreter walks the relation ancestry upwards from a +store+ (and it only evaluates a relation once).
 
+=== Why the verbosity in the code generated from a nested +FOREACH+?
+
+I'm working on it.
+
 === Why aren’t all operations included in the output?
 
 If you try this Piglet code:
@@ -527,6 +539,11 @@ As a side effect of using +store+ and the other output operators as the trigger 
 
 Please contact me and give me the Piglet code and what you think the output should be. I'll try to either fix your Piglet code, or fix Piglet to do what you expect it to do.
 
+== Contributors
+
+* Theo Hultberg
+* Ning Liang
+
 == Copyright
 
-© 2009-2010 Theo Hultberg / Iconara. See LICENSE for details.
+© 2009-2010 Theo Hultberg / Iconara and contributors. See LICENSE for details.
