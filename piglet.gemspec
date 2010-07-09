@@ -5,23 +5,24 @@
 
 Gem::Specification.new do |s|
   s.name = %q{piglet}
-  s.version = "0.2.5"
+  s.version = "0.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Theo Hultberg"]
-  s.date = %q{2010-01-16}
+  s.date = %q{2010-07-09}
   s.default_executable = %q{piglet}
   s.description = %q{Piglet aims to look like Pig Latin while allowing for things like loops and control of flow that are missing from Pig.}
   s.email = %q{theo@iconara.net}
   s.executables = ["piglet"]
   s.extra_rdoc_files = [
     "LICENSE",
-     "README.rdoc",
-     "TODO"
+     "README.rdoc"
   ]
   s.files = [
     ".document",
      ".gitignore",
+     "Gemfile",
+     "Gemfile.lock",
      "LICENSE",
      "README.rdoc",
      "Rakefile",
@@ -33,9 +34,9 @@ Gem::Specification.new do |s|
      "lib/piglet/field/field.rb",
      "lib/piglet/field/infix_expression.rb",
      "lib/piglet/field/literal.rb",
+     "lib/piglet/field/map_value.rb",
      "lib/piglet/field/prefix_expression.rb",
      "lib/piglet/field/reference.rb",
-     "lib/piglet/field/map_value.rb"
      "lib/piglet/field/rename.rb",
      "lib/piglet/field/suffix_expression.rb",
      "lib/piglet/field/udf_expression.rb",
@@ -51,15 +52,16 @@ Gem::Specification.new do |s|
      "lib/piglet/param/declare.rb",
      "lib/piglet/param/default.rb",
      "lib/piglet/param/parameter_statement.rb",
+     "lib/piglet/relation/block_context.rb",
      "lib/piglet/relation/cogroup.rb",
      "lib/piglet/relation/cross.rb",
      "lib/piglet/relation/distinct.rb",
      "lib/piglet/relation/filter.rb",
      "lib/piglet/relation/foreach.rb",
-     "lib/piglet/relation/nested_foreach.rb",
      "lib/piglet/relation/group.rb",
      "lib/piglet/relation/join.rb",
      "lib/piglet/relation/limit.rb",
+     "lib/piglet/relation/nested_foreach.rb",
      "lib/piglet/relation/order.rb",
      "lib/piglet/relation/relation.rb",
      "lib/piglet/relation/sample.rb",
@@ -70,6 +72,7 @@ Gem::Specification.new do |s|
      "lib/piglet/schema/tuple.rb",
      "lib/piglet/udf/define.rb",
      "lib/piglet/udf/register.rb",
+     "piglet.gemspec",
      "spec/piglet/field/binary_conditional_spec.rb",
      "spec/piglet/field/field_spec.rb",
      "spec/piglet/field/infix_expression_spec.rb",
@@ -90,7 +93,7 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/iconara/piglet}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{Piglet is a DSL for Pig scripts}
   s.test_files = [
     "spec/piglet/field/binary_conditional_spec.rb",
@@ -111,7 +114,7 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
     else
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
