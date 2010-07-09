@@ -12,6 +12,10 @@ dependencies:
     group: 
     - :development
     version: ">= 0"
+  rcov: 
+    group: 
+    - :development
+    version: ">= 0"
   jeweler: 
     group: 
     - :development
@@ -35,13 +39,15 @@ specs:
     version: 1.4.0
 - json: 
     version: 1.4.3
+- rcov: 
+    version: 0.9.8
 - rdoc: 
     version: 2.5.8
 - rspec: 
     version: 1.3.0
 - sdoc: 
     version: 0.2.19
-hash: 2b091deb5f61736172d1e5ec51b9cede59ba8a72
+hash: 4f040144929b22ea17e9c74ab3cc8dd9db5a6fcf
 sources: 
 - Rubygems: 
     uri: http://gemcutter.org

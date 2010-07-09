@@ -6,4 +6,5 @@ group :development do
   gem 'jeweler'
   gem 'rdoc', '>= 2.4.0'
   gem 'sdoc'
+  gem 'rcov'
 end
