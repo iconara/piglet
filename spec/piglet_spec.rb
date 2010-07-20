@@ -314,13 +314,18 @@ describe Piglet do
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with field aliasing' do
         @interpreter.interpret { dump(load('in').nested_foreach { a = b.distinct; [a.as(:c)] }) }
-        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = b;\s+(\w+) = DISTINCT \1;\s+GENERATE \2 AS c;\s+\}/)
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = b;\s+(\w+) = DISTINCT \1;\s+GENERATE \2 AS c;\s+\}/m)
       end
       
       it 'outputs a FOREACH ... { ... GENERATE } statement with flatten' do
         @interpreter.interpret { dump(load('in').nested_foreach { [a.flatten] }) }
         @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = FLATTEN\(\1\);\s+GENERATE \2;\s+\}/m)
       end
+      
+      it 'outputs a FOREACH ... { ... GENERATE } statement with projections on direct expressions' do
+        @interpreter.interpret { dump(load('in').nested_foreach { s = a.filter { b == 'test' } ; [s[0]] }) }
+        @interpreter.to_pig_latin.should match(/FOREACH \w+ \{\s+(\w+) = a;\s+(\w+) = FILTER \1 BY b == test;\s+(\w+) = \2\.\$0;\s+GENERATE \3;\s+\}/m)
+      end      
     end
 
     describe 'FILTER' do
