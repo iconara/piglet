@@ -123,6 +123,10 @@ module Piglet
       def get(key)
         MapValue.new(key, self)
       end
+      
+      def [](n)
+        field("\$#{n}")
+      end
     
     protected
 

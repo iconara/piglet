@@ -25,10 +25,6 @@ module Piglet
         end
       end
     
-      def [](n)
-        field("\$#{n}")
-      end
-    
       def to_s(inner=false)
         if @explicit_ancestry
           if @parent.respond_to?(:alias)
